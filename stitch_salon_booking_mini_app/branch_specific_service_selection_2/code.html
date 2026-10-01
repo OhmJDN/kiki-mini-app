@@ -1,0 +1,367 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Branch &amp; Service Selection - Elixir Salon</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "primary-fixed": "#ffdbcc",
+                            "on-secondary-fixed": "#1c1c1a",
+                            "primary-container": "#b78d7a",
+                            "primary-fixed-dim": "#ebbda8",
+                            "inverse-primary": "#ebbda8",
+                            "outline": "#82746e",
+                            "surface-dim": "#dcd9d9",
+                            "tertiary-container": "#9e948d",
+                            "on-background": "#1b1c1c",
+                            "on-primary-fixed": "#2e1508",
+                            "surface-container-highest": "#e4e2e1",
+                            "surface-container-lowest": "#ffffff",
+                            "on-tertiary-container": "#342d28",
+                            "surface": "#f5f0ea",
+                            "on-primary-fixed-variant": "#603f30",
+                            "tertiary-fixed": "#ece0d8",
+                            "surface-container-high": "#eae7e7",
+                            "on-tertiary-fixed-variant": "#4d4540",
+                            "error": "#ba1a1a",
+                            "secondary": "#5f5e5c",
+                            "secondary-container": "#e2dfdc",
+                            "on-error": "#ffffff",
+                            "error-container": "#ffdad6",
+                            "inverse-surface": "#303030",
+                            "on-secondary-container": "#636260",
+                            "background": "#f5f0ea",
+                            "on-surface": "#1b1c1c",
+                            "surface-container": "#f0eded",
+                            "surface-variant": "#e4e2e1",
+                            "surface-container-low": "#f6f3f2",
+                            "on-primary-container": "#44281a",
+                            "tertiary": "#655d57",
+                            "outline-variant": "#d4c3bc",
+                            "secondary-fixed": "#e5e2df",
+                            "on-surface-variant": "#50443f",
+                            "primary": "#7a5646",
+                            "secondary-fixed-dim": "#c8c6c3",
+                            "on-tertiary-fixed": "#201a16",
+                            "surface-bright": "#f5f0ea",
+                            "tertiary-fixed-dim": "#d0c4bd",
+                            "on-tertiary": "#ffffff",
+                            "surface-tint": "#7a5646",
+                            "on-primary": "#ffffff",
+                            "inverse-on-surface": "#f3f0f0",
+                            "on-secondary": "#ffffff",
+                            "on-secondary-fixed-variant": "#474745",
+                            "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "section-padding": "48px",
+                            "stack-gap-md": "16px",
+                            "stack-gap-sm": "8px",
+                            "stack-gap-lg": "32px",
+                            "container-margin": "20px"
+                    },
+                    "fontFamily": {
+                            "headline-md": [
+                                    "Playfair Display"
+                            ],
+                            "body-md": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "body-lg": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "label-sm": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "label-md": [
+                                    "Plus Jakarta Sans"
+                            ],
+                            "display-lg": [
+                                    "Playfair Display"
+                            ],
+                            "headline-lg": [
+                                    "Playfair Display"
+                            ],
+                            "headline-lg-mobile": [
+                                    "Playfair Display"
+                            ]
+                    },
+                    "fontSize": {
+                            "headline-md": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "32px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "body-md": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "28px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "label-sm": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "label-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "letterSpacing": "0.05em",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "display-lg": [
+                                    "40px",
+                                    {
+                                            "lineHeight": "48px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "40px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "headline-lg-mobile": [
+                                    "28px",
+                                    {
+                                            "lineHeight": "34px",
+                                            "fontWeight": "500"
+                                    }
+                            ]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f5f0ea;
+            color: #000000;
+            padding-bottom: 80px; /* Space for BottomNavBar */
+            padding-top: 64px; /* Space for TopAppBar */
+        }
+        
+        .glass-panel {
+            background: rgba(245, 240, 234, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 195, 188, 0.3);
+        }
+        
+        .service-card {
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Hide scrollbar for category menu but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen font-body-md text-black">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md dark:bg-on-background/80 flex justify-between items-center px-container-margin h-16 max-w-md mx-auto">
+<button aria-label="Close" class="text-black hover:opacity-70 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-headline-md text-headline-md tracking-widest text-black" style="--tw-border-spacing-y: 0; --tw-translate-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; --tw-skew-y: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-pan-x: ; --tw-pan-y: ; --tw-pinch-zoom: ; --tw-scroll-snap-strictness: proximity; --tw-gradient-from-position: ; --tw-gradient-via-position: ; --tw-gradient-to-position: ; --tw-ordinal: ; --tw-slashed-zero: ; --tw-numeric-figure: ; --tw-numeric-spacing: ; --tw-numeric-fraction: ; --tw-ring-inset: ; --tw-ring-offset-width: 0px; --tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / 0.5); --tw-ring-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-shadow: 0 0 #0000; --tw-shadow-colored: 0 0 #0000; --tw-blur: ; --tw-brightness: ; --tw-contrast: ; --tw-grayscale: ; --tw-hue-rotate: ; --tw-invert: ; --tw-saturate: ; --tw-sepia: ; --tw-drop-shadow: ; --tw-backdrop-blur: ; --tw-backdrop-brightness: ; --tw-backdrop-contrast: ; --tw-backdrop-grayscale: ; --tw-backdrop-hue-rotate: ; --tw-backdrop-invert: ; --tw-backdrop-opacity: ; --tw-backdrop-saturate: ; --tw-backdrop-sepia: ; --tw-contain-size: ; --tw-contain-layout: ; --tw-contain-paint: ; --tw-contain-style: ; --tw-text-opacity: 1; outline: none !important; box-shadow: none !important;">KIKI Beauty Space</h1>
+<button aria-label="More options" class="text-black hover:opacity-70 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</header>
+<main class="max-w-md mx-auto px-container-margin pt-stack-gap-lg">
+<!-- Booking Progress Stepper -->
+<div class="mb-stack-gap-lg flex items-center justify-between px-4">
+<div class="w-full flex items-center">
+<div class="h-1 w-1/3 bg-black rounded-full"></div>
+<div class="h-1 w-1/3 bg-surface-variant rounded-full mx-1"></div>
+<div class="h-1 w-1/3 bg-surface-variant rounded-full"></div>
+</div>
+</div>
+<!-- Section: Branch Selection -->
+<section class="mb-section-padding">
+<h2 class="font-headline-md text-headline-md text-black mb-stack-gap-md">Select Branch</h2>
+<div class="relative group">
+<select class="w-full appearance-none bg-surface-container-low border border-outline-variant rounded-lg py-4 px-4 text-black font-body-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-colors cursor-pointer"><option selected="" value="downtown">Downtown Flagship Studio</option><option value="siam">Siam Premium Lounge</option><option class="" value="bangna">Mega Bangna</option><option value="westside">Westside Wellness Retreat</option><option value="uptown">Uptown Express Bar</option></select>
+<div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-black">
+<span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Selected Branch Info Preview -->
+<div class="mt-4 flex items-center gap-3 text-black font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="">Mega Bangna</span>
+</div>
+</section>
+<!-- Section: Categories -->
+<section class="mb-section-padding">
+<div class="flex overflow-x-auto no-scrollbar gap-stack-gap-sm pb-2 -mx-container-margin px-container-margin">
+<button class="whitespace-nowrap px-6 py-2 rounded-full bg-[#fcf9f8] text-black border border-black font-label-md text-label-md transition-colors shadow-sm">
+                    Hair Styling
+                </button>
+</div>
+</section>
+<!-- Section: Service List -->
+<section class="space-y-stack-gap-md pb-section-padding">
+<h3 class="font-headline-md text-[20px] text-black mb-stack-gap-md">Signature Hair Services</h3>
+<!-- Service Card 1 -->
+<div class="service-card flex bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/30 shadow-[0_4px_20px_rgba(0,0,0,0.03)] cursor-pointer" id="service-blowout" style="display: flex;">
+<div class="w-1/3 relative">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="A high-end editorial shot of a woman with perfectly styled, voluminous blowout hair in a minimalist salon setting. Soft, natural lighting highlighting the hair texture, light-mode modern aesthetic with serene beige tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMWLC6MtrWEdUIE4rVt_rkpmn1GbWCcSZRI5YiEECNzsIczlpihvOVQrB8htvaSBL9UoNXXp_p0nv-CkAA1lPrabVqprvLImF1yxS7cy6ij_bXSN-ZJ-whXgfZ8BW90ELrXBzlKPYUrMt1TjsZESIF9FZizxN8QMRFOmE7p06YBawbHhnQg_P1nDolesX5hLhOIVACBRJtJyXXNC9KZ5jnp_WpjEpAbucxykt7NWqR8-pnAqCfZmUc">
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between">
+<div>
+<h4 class="font-headline-md text-[18px] leading-tight text-black mb-1">Elixir Signature Blowout</h4>
+<p class="font-body-md text-[14px] text-black line-clamp-2">Our signature wash, deep conditioning mask, and voluminous styled blowout for an effortless look.</p>
+</div>
+<div class="flex justify-between items-end mt-3">
+<div class="flex items-center gap-1 text-black font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span>
+<span class="">60 min</span>
+</div>
+<span class="font-label-md text-label-md text-black">$85</span>
+</div>
+</div>
+</div>
+<!-- Service Card 2 -->
+<div class="service-card flex bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/30 shadow-[0_4px_20px_rgba(0,0,0,0.03)] cursor-pointer" id="service-balayage" style="display: flex;">
+<div class="w-1/3 relative">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Close up of professional salon hair coloring process, foil highlights applied to long healthy hair. Bright, clean luxury salon environment with elegant soft lighting, focusing on the expertise and care in a light modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb4IUbbr7_JyPXpWXU9StwyiTFXBwknUofgkc4-L5_RPI2XhfoM5rIykG2OO3Ud93xAmpMaOFEvr37yZd3pPYl9AxsFzqQFThgUdhBVOYuRlhOzBhS5TiArfIaggKmqJoaXJ-T8htZYO1yqXALMG46nfO3nOlATVsDtFYYm0QdKspLN_kpQwTe75xOEeUJ6WN-t6GSSNORT0Pg-Irl6osPnO2g2xKGEMvM_SCahO63uVcI-GWaQDti">
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between">
+<div>
+<h4 class="font-headline-md text-[18px] leading-tight text-black mb-1">Balayage &amp; Gloss</h4>
+<p class="font-body-md text-[14px] text-black line-clamp-2">Hand-painted highlights tailored to your face shape, finished with a luminous gloss treatment.</p>
+</div>
+<div class="flex justify-between items-end mt-3">
+<div class="flex items-center gap-1 text-black font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span>
+<span class="">150 min</span>
+</div>
+<span class="font-label-md text-label-md text-black">$220</span>
+</div>
+</div>
+</div>
+<!-- Service Card 3 -->
+<div class="service-card flex bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/30 shadow-[0_4px_20px_rgba(0,0,0,0.03)] cursor-pointer" id="service-precision" style="display: flex;">
+<div class="w-1/3 relative">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="A minimalist and elegant shot of a precision haircut taking place. Sharp scissors cutting healthy, sleek hair against a soft beige and white background. High fashion editorial style, luxurious and calming mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4yI4Du2IRfhtPZmUxFuDKiShyr3GpD_LrdZ30Q3nDDUpyHI9spMSRubsG1O5NPAaKK10Ptltkoi_oihed1vvtBABYR1u2Ql88CQwDfvXGcVpUWc65NiR9Uy8iH_V7-D2rwxg0GazGI3gfBPttwBihnqz8ZqarTmHlWcNckPtjVW2rpd87t5cBK2n35ocYs-xgD97AR9_YbtlIcAxtMvoXV_-FgsxD4_7RFakDs40vrZm0-hx7jBoQ">
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between">
+<div>
+<h4 class="font-headline-md text-[18px] leading-tight text-black mb-1">Precision Cut &amp; Style</h4>
+<p class="font-body-md text-[14px] text-black line-clamp-2">Consultation, bespoke haircut tailored to your lifestyle, and finished styling.</p>
+</div>
+<div class="flex justify-between items-end mt-3">
+<div class="flex items-center gap-1 text-black font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span>
+<span class="">75 min</span>
+</div>
+<span class="font-label-md text-label-md text-black">$110</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<!-- The page intent is 'Bookings' / Service Selection -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-xl dark:bg-on-background/90 flex justify-around items-center px-4 py-3 max-w-md mx-auto inset-x-0">
+<button class="flex flex-col items-center justify-center text-black hover:text-black transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="spa">spa</span>
+<span class="font-label-sm text-label-sm">Services</span>
+</button>
+<button class="flex flex-col items-center justify-center text-black font-bold hover:text-black transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_today" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">calendar_today</span>
+<span class="font-label-sm text-label-sm">Bookings</span>
+</button>
+<button class="flex flex-col items-center justify-center text-black hover:text-black transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="location_on">location_on</span>
+<span class="font-label-sm text-label-sm">Branches</span>
+</button>
+<button class="flex flex-col items-center justify-center text-black hover:text-black transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</button>
+</nav>
+<script>
+(function() {
+    const branchSelect = document.querySelector('select');
+    const services = {
+        'blowout': document.getElementById('service-blowout'),
+        'balayage': document.getElementById('service-balayage'),
+        'precision': document.getElementById('service-precision')
+    };
+    const addressText = document.querySelector('section:nth-child(2) .mt-4 span:last-child');
+
+    const addresses = {
+        'downtown': '124 Luxury Avenue, Fashion District',
+        'siam': '991 Rama I Rd, Pathum Wan (Siam Paragon)',
+        'bangna': '587 Debaratna Rd, Bang Na',
+        'westside': '45 Wellness Way, Westside',
+        'uptown': '12 High Street, Uptown'
+    };
+
+    branchSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        
+        // Update Address
+        if (addresses[val]) addressText.textContent = addresses[val];
+
+        // Filter Services
+        if (val === 'bangna') {
+            services['blowout'].style.display = 'none';
+            services['balayage'].style.display = 'none';
+            services['precision'].style.display = 'flex';
+        } else {
+            services['blowout'].style.display = 'flex';
+            services['balayage'].style.display = 'flex';
+            services['precision'].style.display = 'flex';
+        }
+    });
+})();
+</script>
+
+
+</body></html>

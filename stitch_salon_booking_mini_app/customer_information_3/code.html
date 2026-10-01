@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Elixir Salon - Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#ffdbcc",
+                    "on-secondary-fixed": "#1c1c1a",
+                    "primary-container": "#b78d7a",
+                    "primary-fixed-dim": "#ebbda8",
+                    "inverse-primary": "#ebbda8",
+                    "outline": "#82746e",
+                    "surface-dim": "#dcd9d9",
+                    "tertiary-container": "#9e948d",
+                    "on-background": "#1b1c1c",
+                    "on-primary-fixed": "#2e1508",
+                    "surface-container-highest": "#e4e2e1",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#342d28",
+                    "surface": "#fcf9f8",
+                    "on-primary-fixed-variant": "#603f30",
+                    "tertiary-fixed": "#ece0d8",
+                    "surface-container-high": "#eae7e7",
+                    "on-tertiary-fixed-variant": "#4d4540",
+                    "error": "#ba1a1a",
+                    "secondary": "#5f5e5c",
+                    "secondary-container": "#e2dfdc",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#303030",
+                    "on-secondary-container": "#636260",
+                    "background": "#f5f0ea",
+                    "on-surface": "#1b1c1c",
+                    "surface-container": "#f0eded",
+                    "surface-variant": "#e4e2e1",
+                    "surface-container-low": "#f6f3f2",
+                    "on-primary-container": "#44281a",
+                    "tertiary": "#655d57",
+                    "outline-variant": "#d4c3bc",
+                    "secondary-fixed": "#e5e2df",
+                    "on-surface-variant": "#50443f",
+                    "primary": "#7a5646",
+                    "secondary-fixed-dim": "#c8c6c3",
+                    "on-tertiary-fixed": "#201a16",
+                    "surface-bright": "#fcf9f8",
+                    "tertiary-fixed-dim": "#d0c4bd",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#7a5646",
+                    "on-primary": "#ffffff",
+                    "inverse-on-surface": "#f3f0f0",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed-variant": "#474745",
+                    "on-error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-padding": "48px",
+                    "stack-gap-md": "16px",
+                    "stack-gap-sm": "8px",
+                    "stack-gap-lg": "32px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Playfair Display"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Playfair Display"],
+                    "headline-lg": ["Playfair Display"],
+                    "headline-lg-mobile": ["Playfair Display"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .fade-in-up-delay-1 { animation-delay: 0.2s; }
+        .fade-in-up-delay-2 { animation-delay: 0.4s; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-black min-h-screen flex flex-col relative overflow-hidden">
+<!-- Background Image -->
+<div class="absolute inset-0 z-0 h-[530px]">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background z-10"></div>
+<img alt="Luxurious salon interior" class="w-full h-full object-cover object-center filter brightness-95" data-alt="A highly stylized, luxury salon interior with soft, warm, flattering lighting. The space features minimalist architectural lines, polished concrete floors, and bespoke styling stations with large, backlit mirrors. The color palette is dominated by neutral tones like alabaster and taupe, accented with soft rose gold metallic fixtures and lush, deep green tropical plants. The overall aesthetic is serene, elegant, and perfectly aligned with a premium beauty sanctuary." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcugjwql15Xk4jq_cBOC2l43hDTNQJmvwua2M-6xv-WjxNnuI8t8plx_5ZpyFaVVZhAVtn1UCdERPzUbL6qtDSNz838lO2zvTegN8G1kzppnT2DyZmSw6QJEw9wfv7WIfLnchUMeMYQSHvNHmwcrln4soPE14QaKrKAxao4SVYr2Rm1ZPmAX3hfCCQq3418_IeBR9JsR7Ej9hgca6ezn_6p0cm3k4OiOZ_pHG6PDhPMTsjw752X-LI"/>
+</div>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col justify-end z-10 px-container-margin pb-[64px] pt-[397px]">
+<!-- Welcome Text -->
+<div class="mb-stack-gap-lg text-center fade-in-up">
+<h1 class="font-display-lg text-display-lg text-black mb-stack-gap-sm">Welcome to KIKI Beauty Space</h1>
+<p class="font-body-md text-body-md text-black max-w-sm mx-auto"><br/></p>
+</div>
+<!-- Action Card -->
+<div class="bg-surface/90 backdrop-blur-xl rounded-xl p-6 shadow-sm border border-outline-variant/30 fade-in-up fade-in-up-delay-1">
+<h2 class="font-headline-md text-headline-md text-black mb-stack-gap-lg text-center">Are you a new or existing customer?</h2>
+<div class="flex flex-col gap-4">
+<button class="w-full bg-[#fcf9f8] text-black py-4 px-6 rounded-lg font-label-md text-label-md hover:bg-white transition-colors active:scale-[0.98] flex items-center justify-center gap-2 border border-black/10 shadow-sm">
+                    New Customer
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<button class="w-full bg-[#fcf9f8] border border-black text-black py-4 px-6 rounded-lg font-label-md text-label-md hover:bg-white transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
+                    Sign In / Existing Customer
+                </button>
+</div>
+</div>
+</main>
+<!-- Suppressed TopAppBar and BottomNavBar as this is a linear transactional onboarding screen -->
+</body></html>

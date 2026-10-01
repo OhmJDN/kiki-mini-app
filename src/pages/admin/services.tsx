@@ -39,6 +39,8 @@ export function AdminServicesPage() {
   const [formDescription, setFormDescription] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('');
   const [formIsActive, setFormIsActive] = useState(true);
+  const [formDepositRequired, setFormDepositRequired] = useState(false);
+  const [formDepositAmount, setFormDepositAmount] = useState<number>(300);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -64,6 +66,8 @@ export function AdminServicesPage() {
     setFormDescription('');
     setFormImageUrl('https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&auto=format&fit=crop&q=80');
     setFormIsActive(true);
+    setFormDepositRequired(false);
+    setFormDepositAmount(300);
     setModalOpen(true);
   };
 
@@ -76,6 +80,8 @@ export function AdminServicesPage() {
     setFormDescription(service.description);
     setFormImageUrl(service.image_url || '');
     setFormIsActive(service.is_active);
+    setFormDepositRequired(service.deposit_required || false);
+    setFormDepositAmount(service.deposit_amount || 300);
     setModalOpen(true);
   };
 
@@ -112,6 +118,8 @@ export function AdminServicesPage() {
           duration_minutes: Number(formDuration),
           description: formDescription,
           image_url: formImageUrl || null,
+          deposit_required: formDepositRequired,
+          deposit_amount: formDepositRequired ? Number(formDepositAmount) : 0,
           is_active: formIsActive,
         });
       } else {
@@ -122,6 +130,8 @@ export function AdminServicesPage() {
           duration_minutes: Number(formDuration),
           description: formDescription,
           image_url: formImageUrl || null,
+          deposit_required: formDepositRequired,
+          deposit_amount: formDepositRequired ? Number(formDepositAmount) : 0,
           is_active: formIsActive,
         });
       }
@@ -258,7 +268,17 @@ export function AdminServicesPage() {
                     </td>
 
                     <td className="py-3 px-4 font-serif font-bold text-sm text-[#7a5646]">
-                      ฿{s.price.toLocaleString()}
+                      <div>฿{s.price.toLocaleString()}</div>
+                      {s.deposit_required ? (
+                        <div className="text-[10px] text-amber-700 font-sans font-medium flex items-center gap-1 mt-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                          มัดจำ ฿{s.deposit_amount?.toLocaleString() || '300'}
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-[#636260]/70 font-sans font-normal">
+                          ไม่ต้องมัดจำ
+                        </div>
+                      )}
                     </td>
 
                     <td className="py-3 px-4 text-[#636260]">
@@ -407,6 +427,41 @@ export function AdminServicesPage() {
                   placeholder="https://..."
                   className="bg-card border-[#d4c3bc]/60 rounded-xl"
                 />
+              </div>
+
+              {/* Deposit Setting */}
+              <div className="p-3.5 bg-[#f5f0ea]/70 rounded-2xl border border-[#d4c3bc]/60 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-xs text-[#1b1c1c]">เรียกเก็บเงินมัดจำ (Deposit Required)</div>
+                    <div className="text-[11px] text-[#636260]">ลูกค้าต้องแนบสลิปโอนเงินมัดจำล่วงหน้าเมื่อจองบริการนี้</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formDepositRequired}
+                      onChange={(e) => setFormDepositRequired(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7a5646]"></div>
+                  </label>
+                </div>
+
+                {formDepositRequired && (
+                  <div className="pt-2 border-t border-[#d4c3bc]/40">
+                    <label className="block font-semibold text-[#636260] mb-1">จำนวนเงินมัดจำ (บาท) *</label>
+                    <Input
+                      type="number"
+                      value={formDepositAmount}
+                      onChange={(e) => setFormDepositAmount(Number(e.target.value))}
+                      min={50}
+                      step={50}
+                      required={formDepositRequired}
+                      className="bg-card border-[#d4c3bc]/60 rounded-xl"
+                      placeholder="เช่น 300 หรือ 500"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="pt-2">

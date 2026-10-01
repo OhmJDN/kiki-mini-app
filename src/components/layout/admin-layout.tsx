@@ -10,7 +10,9 @@ import {
   LogOut, 
   Sparkles, 
   ArrowLeft,
-  ShieldCheck
+  ShieldCheck,
+  MapPin,
+  UserCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -60,8 +62,10 @@ export function AdminLayout() {
 
   const navItems = [
     { name: 'ภาพรวมร้าน', path: '/admin', icon: LayoutDashboard },
-    { name: 'จัดการการจอง', path: '/admin/bookings', icon: Calendar },
+    { name: 'การจอง & สลิป', path: '/admin/bookings', icon: Calendar },
     { name: 'จัดการบริการ', path: '/admin/services', icon: Scissors },
+    { name: 'ช่าง & ตารางงาน', path: '/admin/stylists', icon: UserCheck },
+    { name: 'จัดการสาขา', path: '/admin/branches', icon: MapPin },
     { name: 'ฐานข้อมูลลูกค้า', path: '/admin/customers', icon: Users },
   ];
 
@@ -168,7 +172,7 @@ export function AdminLayout() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden border-t border-[#d4c3bc]/60 bg-card sticky bottom-0 z-30 shadow-lg">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-6 h-16 px-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -177,12 +181,12 @@ export function AdminLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center justify-center p-1 ${
+                className={`flex flex-col items-center justify-center p-0.5 ${
                   isActive ? 'text-[#7a5646] font-semibold' : 'text-[#636260]'
                 }`}
               >
-                <Icon className="w-5 h-5 mb-0.5" />
-                <span className="text-[10px]">{item.name}</span>
+                <Icon className="w-4 h-4 mb-0.5" />
+                <span className="text-[9px] text-center leading-tight line-clamp-1">{item.name}</span>
               </Link>
             );
           })}

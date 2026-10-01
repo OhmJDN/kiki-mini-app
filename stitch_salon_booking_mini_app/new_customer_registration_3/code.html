@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Elixir Salon - Registration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#eae7e7",
+                        "surface-dim": "#dcd9d9",
+                        "primary-fixed-dim": "#ebbda8",
+                        "surface-variant": "#e4e2e1",
+                        "on-secondary-fixed-variant": "#474745",
+                        "on-secondary-container": "#636260",
+                        "surface-container": "#f0eded",
+                        "outline-variant": "#d4c3bc",
+                        "primary-container": "#b78d7a",
+                        "on-primary-fixed": "#2e1508",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e4e2e1",
+                        "inverse-surface": "#303030",
+                        "on-tertiary-container": "#342d28",
+                        "inverse-on-surface": "#f3f0f0",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ebbda8",
+                        "on-secondary-fixed": "#1c1c1a",
+                        "surface-container-low": "#f6f3f2",
+                        "on-background": "#1b1c1c",
+                        "primary": "#7a5646",
+                        "secondary-container": "#e2dfdc",
+                        "tertiary-fixed": "#ece0d8",
+                        "on-surface-variant": "#50443f",
+                        "on-tertiary-fixed-variant": "#4d4540",
+                        "surface-tint": "#7a5646",
+                        "tertiary": "#655d57",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#201a16",
+                        "tertiary-fixed-dim": "#d0c4bd",
+                        "outline": "#82746e",
+                        "on-primary-container": "#44281a",
+                        "surface": "#f5f0ea",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#603f30",
+                        "on-surface": "#1b1c1c",
+                        "surface-bright": "#f5f0ea",
+                        "secondary-fixed-dim": "#c8c6c3",
+                        "secondary": "#5f5e5c",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#9e948d",
+                        "secondary-fixed": "#e5e2df",
+                        "primary-fixed": "#ffdbcc",
+                        "background": "#f5f0ea"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap-md": "16px",
+                        "container-margin": "20px",
+                        "section-padding": "48px",
+                        "stack-gap-lg": "32px",
+                        "stack-gap-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Playfair Display"],
+                        "display-lg": ["Playfair Display"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Playfair Display"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f5f0ea;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .floating-input:focus-within label,
+        .floating-input input:not(:placeholder-shown) + label {
+            transform: translateY(-1.5rem) scale(0.85);
+            color: #7a5646;
+        }
+        
+        .floating-input input {
+            border: none;
+            border-bottom: 1px solid #d4c3bc;
+            border-radius: 0;
+            padding: 0.5rem 0;
+            background: transparent;
+        }
+        
+        .floating-input input:focus {
+            box-shadow: none;
+            border-bottom-color: #7a5646;
+        }
+        
+        /* Subtle texture overlay for premium feel */
+        .premium-texture {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-background min-h-screen flex flex-col relative overflow-x-hidden font-body-md">
+<div class="premium-texture"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md dark:bg-on-background/80 transition-all duration-300" id="topAppBar">
+<div class="flex justify-between items-center px-container-margin h-16 w-full max-w-md mx-auto">
+<button class="text-on-surface-variant hover:opacity-70 transition-opacity active:scale-95 transition-transform p-2 -ml-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-headline-md text-headline-md tracking-widest text-primary dark:text-primary-fixed-dim"></h1><h1 class="font-headline-md text-headline-md tracking-widest text-primary dark:text-primary-fixed-dim cursor-text" data-stitch-added-classes="cursor-text" spellcheck="false" style="--tw-border-spacing-y: 0; --tw-translate-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; --tw-skew-y: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-pan-x: ; --tw-pan-y: ; --tw-pinch-zoom: ; --tw-scroll-snap-strictness: proximity; --tw-gradient-from-position: ; --tw-gradient-via-position: ; --tw-gradient-to-position: ; --tw-ordinal: ; --tw-slashed-zero: ; --tw-numeric-figure: ; --tw-numeric-spacing: ; --tw-numeric-fraction: ; --tw-ring-inset: ; --tw-ring-offset-width: 0px; --tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / 0.5); --tw-ring-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-shadow: 0 0 #0000; --tw-shadow-colored: 0 0 #0000; --tw-blur: ; --tw-brightness: ; --tw-contrast: ; --tw-grayscale: ; --tw-hue-rotate: ; --tw-invert: ; --tw-saturate: ; --tw-sepia: ; --tw-drop-shadow: ; --tw-backdrop-blur: ; --tw-backdrop-brightness: ; --tw-backdrop-contrast: ; --tw-backdrop-grayscale: ; --tw-backdrop-hue-rotate: ; --tw-backdrop-invert: ; --tw-backdrop-opacity: ; --tw-backdrop-saturate: ; --tw-backdrop-sepia: ; --tw-contain-size: ; --tw-contain-layout: ; --tw-contain-paint: ; --tw-contain-style: ; --tw-text-opacity: 1; color: rgb(122, 86, 70); outline: none !important; box-shadow: none !important;">KIKI Beauty Space</h1>
+<button class="text-on-surface-variant hover:opacity-70 transition-opacity active:scale-95 transition-transform p-2 -mr-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-24 pb-32 px-container-margin max-w-md mx-auto w-full relative z-10 flex flex-col">
+<!-- Registration Header -->
+<div class="mb-10 transform transition-all duration-700 ease-out opacity-100 translate-y-0" id="headerAnim">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-2">Create Profile</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Join our sanctuary of serene elegance. Please enter your details below.</p>
+</div>
+<!-- Form Area (Glassmorphism inspired container) -->
+<form class="flex-grow flex flex-col gap-stack-lg" id="registrationForm">
+<div class="bg-surface-container-low rounded-xl p-6 shadow-sm border border-outline-variant/30 flex flex-col gap-stack-lg relative overflow-hidden">
+<!-- Subtle decorative element -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-fixed rounded-full blur-3xl opacity-40 pointer-events-none"></div>
+<!-- Input Fields -->
+<div class="floating-input relative pt-4">
+<input class="w-full font-body-md text-body-md text-on-surface focus:outline-none focus:ring-0 peer" id="firstName" name="firstName" placeholder=" " required="" type="text"/>
+<label class="absolute left-0 top-6 font-body-md text-body-md text-on-surface-variant transition-all duration-300 pointer-events-none origin-left" for="firstName">First Name</label>
+</div>
+<div class="floating-input relative pt-4">
+<input class="w-full font-body-md text-body-md text-on-surface focus:outline-none focus:ring-0 peer" id="lastName" name="lastName" placeholder=" " required="" type="text"/>
+<label class="absolute left-0 top-6 font-body-md text-body-md text-on-surface-variant transition-all duration-300 pointer-events-none origin-left" for="lastName">Last Name</label>
+</div>
+<div class="floating-input relative pt-4">
+<input class="w-full font-body-md text-body-md text-on-surface focus:outline-none focus:ring-0 peer" id="phoneNumber" name="phoneNumber" placeholder=" " required="" type="tel"/>
+<label class="absolute left-0 top-6 font-body-md text-body-md text-on-surface-variant transition-all duration-300 pointer-events-none origin-left" for="phoneNumber">Phone Number</label>
+</div>
+<!-- Consent Checkbox -->
+<div class="flex items-start gap-3 mt-2">
+<div class="flex items-center h-6">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-primary focus:ring-2 focus:ring-offset-background bg-transparent transition-colors cursor-pointer" id="consent" type="checkbox"/>
+</div>
+<label class="font-label-sm text-label-sm text-on-surface-variant pt-1 cursor-pointer" for="consent">
+                        I agree to the <a class="text-primary hover:underline underline-offset-2" href="#">Terms of Service</a> and <a class="text-primary hover:underline underline-offset-2" href="#">Privacy Policy</a>.
+                    </label>
+</div>
+</div>
+<!-- Sticky Footer CTA area -->
+<div class="mt-auto pt-section-padding pb-6">
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-4 rounded-full shadow-sm hover:bg-on-primary-fixed-variant hover:shadow-md transition-all duration-300 active:scale-[0.98] flex justify-center items-center gap-2 group" type="submit">
+<span class="">Continue</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</form>
+</main>
+<!-- Navigation Shell Suppression: 
+         As this is a transactional "Registration" screen (a linear flow, onboarding), 
+         the BottomNavBar is intentionally suppressed according to the Semantic Shell Mandate. 
+    -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simple entry animation
+            setTimeout(() => {
+                const header = document.getElementById('headerAnim');
+                header.classList.remove('opacity-0', 'translate-y-4');
+                header.classList.add('opacity-100', 'translate-y-0');
+            }, 100);
+
+            // Form validation/interaction logic
+            const form = document.getElementById('registrationForm');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                
+                // Loading state
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="progress_activity">progress_activity</span>';
+                btn.classList.add('opacity-80', 'cursor-not-allowed');
+                
+                // Simulate processing
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('opacity-80', 'cursor-not-allowed');
+                    // In a real app, transition to next step here
+                }, 1500);
+            });
+            
+            // Scroll effect for top app bar
+            const topBar = document.getElementById('topAppBar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    topBar.classList.add('shadow-sm', 'bg-surface/95');
+                    topBar.classList.remove('bg-surface/80');
+                } else {
+                    topBar.classList.remove('shadow-sm', 'bg-surface/95');
+                    topBar.classList.add('bg-surface/80');
+                }
+            });
+        });
+    </script>
+</body></html>

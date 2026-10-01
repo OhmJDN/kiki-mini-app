@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>ELIXIR SALON - Scheduling</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#ffdbcc",
+                    "on-secondary-fixed": "#1c1c1a",
+                    "primary-container": "#b78d7a",
+                    "primary-fixed-dim": "#ebbda8",
+                    "inverse-primary": "#ebbda8",
+                    "outline": "#82746e",
+                    "surface-dim": "#dcd9d9",
+                    "tertiary-container": "#9e948d",
+                    "on-background": "#1b1c1c",
+                    "on-primary-fixed": "#2e1508",
+                    "surface-container-highest": "#e4e2e1",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#342d28",
+                    "surface": "#f5f0ea",
+                    "on-primary-fixed-variant": "#603f30",
+                    "tertiary-fixed": "#ece0d8",
+                    "surface-container-high": "#eae7e7",
+                    "on-tertiary-fixed-variant": "#4d4540",
+                    "error": "#ba1a1a",
+                    "secondary": "#5f5e5c",
+                    "secondary-container": "#e2dfdc",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#303030",
+                    "on-secondary-container": "#636260",
+                    "background": "#f5f0ea",
+                    "on-surface": "#1b1c1c",
+                    "surface-container": "#f0eded",
+                    "surface-variant": "#e4e2e1",
+                    "surface-container-low": "#f6f3f2",
+                    "on-primary-container": "#44281a",
+                    "tertiary": "#655d57",
+                    "outline-variant": "#d4c3bc",
+                    "secondary-fixed": "#e5e2df",
+                    "on-surface-variant": "#50443f",
+                    "primary": "#7a5646",
+                    "secondary-fixed-dim": "#c8c6c3",
+                    "on-tertiary-fixed": "#201a16",
+                    "surface-bright": "#f5f0ea",
+                    "tertiary-fixed-dim": "#d0c4bd",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#7a5646",
+                    "on-primary": "#ffffff",
+                    "inverse-on-surface": "#f3f0f0",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed-variant": "#474745",
+                    "on-error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-padding": "48px",
+                    "stack-gap-md": "16px",
+                    "stack-gap-sm": "8px",
+                    "stack-gap-lg": "32px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Playfair Display"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Playfair Display"],
+                    "headline-lg": ["Playfair Display"],
+                    "headline-lg-mobile": ["Playfair Display"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Thin progress stepper */
+        .stepper-line {
+            height: 1px;
+            background: linear-gradient(90deg, #000000 66%, #d4c3bc 66%);
+        }
+
+        /* Hide scrollbar for horizontal scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-black font-body-md min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md dark:bg-on-background/80">
+<div class="flex justify-between items-center px-container-margin h-16 w-full max-w-md mx-auto">
+<button class="text-black hover:opacity-70 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-headline-md text-headline-md tracking-widest text-black dark:text-primary-fixed-dim uppercase"></h1><h1 class="font-headline-md text-headline-md tracking-widest text-black dark:text-primary-fixed-dim cursor-text" data-stitch-added-classes="cursor-text" spellcheck="false" style="--tw-border-spacing-y: 0; --tw-translate-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; --tw-skew-y: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-pan-x: ; --tw-pan-y: ; --tw-pinch-zoom: ; --tw-scroll-snap-strictness: proximity; --tw-gradient-from-position: ; --tw-gradient-via-position: ; --tw-gradient-to-position: ; --tw-ordinal: ; --tw-slashed-zero: ; --tw-numeric-figure: ; --tw-numeric-spacing: ; --tw-numeric-fraction: ; --tw-ring-inset: ; --tw-ring-offset-width: 0px; --tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / 0.5); --tw-ring-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-shadow: 0 0 #0000; --tw-shadow-colored: 0 0 #0000; --tw-blur: ; --tw-brightness: ; --tw-contrast: ; --tw-grayscale: ; --tw-hue-rotate: ; --tw-invert: ; --tw-saturate: ; --tw-sepia: ; --tw-drop-shadow: ; --tw-backdrop-blur: ; --tw-backdrop-brightness: ; --tw-backdrop-contrast: ; --tw-backdrop-grayscale: ; --tw-backdrop-hue-rotate: ; --tw-backdrop-invert: ; --tw-backdrop-opacity: ; --tw-backdrop-saturate: ; --tw-backdrop-sepia: ; --tw-contain-size: ; --tw-contain-layout: ; --tw-contain-paint: ; --tw-contain-style: ; --tw-text-opacity: 1; color: #000000; text-transform: none; outline: none !important; box-shadow: none !important;">KIKI Beauty Space</h1>
+<button class="text-black hover:opacity-70 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+<!-- Progress Stepper -->
+<div class="w-full max-w-md mx-auto px-container-margin pb-2">
+<div class="stepper-line w-full rounded-full"></div>
+<div class="flex justify-between mt-2 px-1">
+<span class="font-label-sm text-label-sm text-black">Service</span>
+<span class="font-label-sm text-label-sm text-black">Time</span>
+<span class="font-label-sm text-label-sm text-black">Details</span>
+</div>
+</div>
+</header>
+<main class="w-full max-w-md mx-auto pt-24 px-container-margin flex flex-col gap-section-padding">
+<!-- Header Text -->
+<section class="text-center mt-4">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-black mb-2">Schedule Appointment</h2>
+<p class="font-body-md text-body-md text-black">Select your preferred date, time, and stylist for the Signature Balayage service.</p>
+</section>
+<!-- Calendar Section -->
+<section class="flex flex-col gap-stack-gap-md bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-surface-container-highest">
+<div class="flex justify-between items-center mb-2">
+<h3 class="font-label-md text-label-md uppercase text-black">October 2023</h3>
+<div class="flex gap-2">
+<button class="p-1 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-sm text-black">chevron_left</span></button>
+<button class="p-1 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-sm text-black">chevron_right</span></button>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-1 text-center mb-2">
+<div class="font-label-sm text-label-sm text-black">S</div>
+<div class="font-label-sm text-label-sm text-black">M</div>
+<div class="font-label-sm text-label-sm text-black">T</div>
+<div class="font-label-sm text-label-sm text-black">W</div>
+<div class="font-label-sm text-label-sm text-black">T</div>
+<div class="font-label-sm text-label-sm text-black">F</div>
+<div class="font-label-sm text-label-sm text-black">S</div>
+</div>
+<div class="grid grid-cols-7 gap-2 text-center">
+<!-- Example Dates - In a real app these would be generated dynamically -->
+<div class="py-2 text-black font-body-md text-body-md opacity-50">1</div>
+<div class="py-2 text-black font-body-md text-body-md opacity-50">2</div>
+<div class="py-2 text-black font-body-md text-body-md opacity-50">3</div>
+<div class="py-2 text-black font-body-md text-body-md opacity-50">4</div>
+<div class="py-2 text-black font-body-md text-body-md opacity-50">5</div>
+<div class="py-2 text-black font-body-md text-body-md opacity-50">6</div>
+<div class="py-2 text-black font-body-md text-body-md opacity-50">7</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">8</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">9</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">10</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">11</div>
+<div class="py-2 bg-[#fcf9f8] border border-black text-black font-body-md text-body-md rounded-full shadow-sm cursor-pointer">12</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">13</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">14</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">15</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">16</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">17</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">18</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">19</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">20</div>
+<div class="py-2 text-black font-body-md text-body-md hover:bg-surface-container rounded-full cursor-pointer transition-colors">21</div>
+</div>
+</section>
+<!-- Select Hairdresser -->
+<section class="flex flex-col gap-stack-gap-md">
+<h3 class="font-headline-md text-headline-md text-black">Select Stylist</h3>
+<div class="flex overflow-x-auto gap-4 pb-2 hide-scrollbar snap-x">
+<!-- Stylist Card 1 -->
+<div class="flex-shrink-0 w-36 snap-start flex flex-col items-center p-4 bg-[#fcf9f8] border border-black rounded-xl cursor-pointer relative overflow-hidden">
+<div class="absolute top-2 right-2">
+<span class="material-symbols-outlined text-black text-sm" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<img class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-surface" data-alt="A professional headshot of a stylish female hair colorist with an elegant updo, wearing a minimal black salon apron, softly lit in a premium, modern light-mode salon environment with a warm rose-gold aesthetic, highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIpKclCwa8TI7S-geaMw4I1RXeYq1-n7dEQfjUt4PfJTcJ8p1Ahz1bUeSzXZiPLJqOarMquwYydrQNgIPOepvML9E81RGRuAhyNQo-nEbLetBfbEHjJma9j_KBbOH3E-z0YWzHsBgqMnP58Up0RisWVjyjSv9vP7gM_aRPyMpX5X7A0Htqt8pirCa74ZP2f_V9Xuvt_VbKJ8DIi6t-IEZsY4kpCcMjzPA6NgWVdDS-MRRfFnZanJJj"/>
+<h4 class="font-label-md text-label-md text-black text-center">Elena R.</h4>
+<p class="font-label-sm text-label-sm text-black text-center mt-1">Master Colorist</p>
+</div>
+<!-- Stylist Card 2 -->
+<div class="flex-shrink-0 w-36 snap-start flex flex-col items-center p-4 bg-surface rounded-xl border border-transparent hover:border-black cursor-pointer transition-colors">
+<img class="w-16 h-16 rounded-full object-cover mb-3" data-alt="A professional headshot of a sophisticated male hair stylist with neat short hair, wearing a crisp white button-down shirt, warmly lit in a luxurious minimalist salon with soft natural lighting and light tonal backgrounds, highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkLwXo2uccbwB36YNWq75gGTSs_vUK66Fs3K6Rd1b5bdtyc2EUGipB9ETo7KApZnxIOSKrz1poOFtiW5TSWfiIQwu01yDBGe6Mg0zGi4gZ_AYUdUnytyrgFxDAu98IwmQVgkC6pGQhcf3bckw3U98J3REVYQH9us5EGvhaC0_1AjnuVzC7dhrVJ17VYkpBGFqy5aNt948a0WpIxMkC41-Swks79PO-SACxygNTltx4H74ZJ67aY4eR"/>
+<h4 class="font-label-md text-label-md text-black text-center">Julian M.</h4>
+<p class="font-label-sm text-label-sm text-black text-center mt-1">Senior Stylist</p>
+</div>
+<!-- Stylist Card 3 -->
+<div class="flex-shrink-0 w-36 snap-start flex flex-col items-center p-4 bg-surface rounded-xl border border-transparent hover:border-black cursor-pointer transition-colors">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-3 text-black">
+<span class="material-symbols-outlined text-3xl">groups</span>
+</div>
+<h4 class="font-label-md text-label-md text-black text-center">No Preference</h4>
+<p class="font-label-sm text-label-sm text-black text-center mt-1">First Available</p>
+</div>
+</div>
+</section>
+<!-- Time Slots -->
+<section class="flex flex-col gap-stack-gap-md mb-8">
+<h3 class="font-headline-md text-headline-md text-black">Available Times</h3>
+<p class="font-label-sm text-label-sm text-black uppercase tracking-widest">Morning</p>
+<div class="flex flex-wrap gap-3">
+<button class="px-6 py-2 rounded-full border border-black text-black font-body-md text-body-md bg-[#fcf9f8] hover:bg-surface-container transition-colors">09:00 AM</button>
+<button class="px-6 py-2 rounded-full border border-black text-black font-body-md text-body-md bg-[#fcf9f8] hover:bg-surface-container transition-colors">10:30 AM</button>
+<button class="px-6 py-2 rounded-full border border-black text-black font-body-md text-body-md bg-[#fcf9f8] hover:bg-surface-container transition-colors opacity-50 cursor-not-allowed">11:15 AM</button>
+</div>
+<p class="font-label-sm text-label-sm text-black uppercase tracking-widest mt-4">Afternoon</p>
+<div class="flex flex-wrap gap-3">
+<button class="px-6 py-2 rounded-full border border-black text-black font-body-md text-body-md bg-[#fcf9f8] hover:bg-surface-container transition-colors">01:00 PM</button>
+<button class="px-6 py-2 rounded-full border-2 border-black bg-[#fcf9f8] text-black font-body-md text-body-md shadow-sm">02:30 PM</button>
+<button class="px-6 py-2 rounded-full border border-black text-black font-body-md text-body-md bg-[#fcf9f8] hover:bg-surface-container transition-colors">04:00 PM</button>
+</div>
+</section>
+</main>
+<!-- Sticky Footer (Book Now) -->
+<div class="fixed bottom-0 w-full z-40 bg-surface/80 backdrop-blur-xl border-t border-black/30 px-container-margin py-4">
+<div class="max-w-md mx-auto flex justify-between items-center gap-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-black">Total</span>
+<span class="font-headline-md text-headline-md text-black">$120.00</span>
+</div>
+<button class="flex-1 border border-black bg-[#fcf9f8] text-black rounded-full py-4 font-label-md text-label-md uppercase tracking-wider hover:bg-[#f5f0ea] transition-colors shadow-md active:scale-95 text-center">
+                Confirm Selection
+            </button>
+</div>
+</div>
+</body></html>

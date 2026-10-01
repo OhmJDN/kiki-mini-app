@@ -14,6 +14,8 @@ import { BookingsPage } from './pages/customer/bookings';
 import { AdminDashboard } from './pages/admin/dashboard';
 import { AdminBookingsPage } from './pages/admin/bookings';
 import { AdminServicesPage } from './pages/admin/services';
+import { AdminStylistsPage } from './pages/admin/stylists';
+import { AdminBranchesPage } from './pages/admin/branches';
 import { AdminCustomersPage } from './pages/admin/customers';
 
 const queryClient = new QueryClient({
@@ -54,6 +56,8 @@ function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookingsPage />} />
             <Route path="services" element={<AdminServicesPage />} />
+            <Route path="stylists" element={<AdminStylistsPage />} />
+            <Route path="branches" element={<AdminBranchesPage />} />
             <Route path="customers" element={<AdminCustomersPage />} />
           </Route>
 
