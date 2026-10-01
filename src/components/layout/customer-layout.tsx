@@ -1,0 +1,182 @@
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/auth-store';
+import { loginAsDemo } from '@/features/auth/auth-service';
+import { Toaster } from '@/components/ui/toaster';
+import { 
+  Home, 
+  Calendar, 
+  Scissors, 
+  LogOut, 
+  Sparkles, 
+  Shield, 
+  ChevronDown
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+
+export function CustomerLayout() {
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // If not authenticated, provide automatic guest session so user can freely explore!
+  const handleAutoLoginCustomer = async () => {
+    await loginAsDemo('customer');
+  };
+
+  const handleSwitchToAdmin = async () => {
+    await loginAsDemo('admin');
+    navigate('/admin');
+  };
+
+  const navItems = [
+    { name: 'หน้าแรก', path: '/home', icon: Home },
+    { name: 'บริการทั้งหมด', path: '/home/services', icon: Scissors },
+    { name: 'การจองของฉัน', path: '/home/bookings', icon: Calendar },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#f5f0ea] text-[#1b1c1c] pb-20 selection:bg-[#7a5646] selection:text-white">
+      {/* Top Header */}
+      <header className="sticky top-0 z-40 w-full border-b border-[#d4c3bc]/50 bg-[#f5f0ea]/90 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
+          {/* Brand Logo */}
+          <Link to="/home" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-[#7a5646] flex items-center justify-center text-white shadow-sm">
+              <Sparkles className="w-4 h-4 text-amber-200" />
+            </div>
+            <div>
+              <span className="font-serif font-bold text-lg tracking-widest text-[#1b1c1c]">KIKI</span>
+              <span className="text-[10px] uppercase tracking-wider text-[#7a5646] block -mt-1 font-medium">Beauty Space</span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden sm:flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    isActive
+                      ? 'bg-[#7a5646] text-white shadow-sm'
+                      : 'text-[#636260] hover:text-[#1b1c1c] hover:bg-[#e8ded8]'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* User Profile / Menu */}
+          <div className="relative">
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-[#e8ded8] transition-colors border border-[#d4c3bc]/60 bg-card pr-3"
+                >
+                  {user.picture_url ? (
+                    <img
+                      src={user.picture_url}
+                      alt={user.display_name}
+                      className="w-7 h-7 rounded-full object-cover ring-1 ring-[#7a5646]/40"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-[#7a5646]/10 text-[#7a5646] flex items-center justify-center font-bold text-xs">
+                      {user.display_name?.[0] || 'U'}
+                    </div>
+                  )}
+                  <span className="text-xs font-medium text-[#1b1c1c] max-w-[100px] truncate hidden sm:inline">
+                    {user.display_name}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-[#636260]" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-card rounded-2xl shadow-xl border border-[#d4c3bc]/70 py-2 z-50 animate-in fade-in zoom-in-95">
+                    <div className="px-4 py-2 border-b border-[#d4c3bc]/40">
+                      <p className="text-xs font-semibold text-[#1b1c1c]">{user.display_name}</p>
+                      <p className="text-[11px] text-[#636260] capitalize">{user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ลูกค้า'}</p>
+                    </div>
+
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          handleSwitchToAdmin();
+                        }}
+                        className="w-full px-4 py-2 text-left text-xs text-[#7a5646] hover:bg-[#f5f0ea] flex items-center gap-2 font-medium"
+                      >
+                        <Shield className="w-3.5 h-3.5" />
+                        สลับไปโหมดผู้ดูแล (Admin)
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          logout();
+                          navigate('/');
+                        }}
+                        className="w-full px-4 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        ออกจากระบบ
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleAutoLoginCustomer}
+                className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full text-xs px-4"
+              >
+                เข้าสู่ระบบ
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Page Content */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <Outlet />
+      </main>
+
+      {/* Bottom Navigation for Mobile Devices */}
+      <nav className="fixed bottom-0 left-0 z-40 w-full h-16 border-t border-[#d4c3bc]/60 bg-[#f5f0ea]/95 backdrop-blur-lg sm:hidden shadow-lg">
+        <div className="grid h-full grid-cols-3 max-w-md mx-auto">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`inline-flex flex-col items-center justify-center p-1 transition-all ${
+                  isActive ? 'text-[#7a5646] font-semibold' : 'text-[#636260] hover:text-[#1b1c1c]'
+                }`}
+              >
+                <div className={`p-1 rounded-full ${isActive ? 'bg-[#7a5646]/10' : ''}`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] mt-0.5">{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      <Toaster />
+    </div>
+  );
+}

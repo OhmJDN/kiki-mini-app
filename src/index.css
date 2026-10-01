@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 34 32% 92%; /* #f5f0ea */
+    --foreground: 180 2% 11%; /* #1b1c1c */
+    --card: 15 28% 98%; /* #fcf9f8 */
+    --card-foreground: 180 2% 11%; /* #1b1c1c */
+    --popover: 0 0% 100%; /* #ffffff */
+    --popover-foreground: 180 2% 11%; /* #1b1c1c */
+    --primary: 20 27% 38%; /* #7a5646 */
+    --primary-foreground: 0 0% 100%; /* #ffffff */
+    --secondary: 40 1% 36%; /* #5f5e5c */
+    --secondary-foreground: 0 0% 100%; /* #ffffff */
+    --muted: 0 5% 93%; /* #f0eded */
+    --muted-foreground: 40 1% 38%; /* #636260 */
+    --accent: 20 27% 38%; /* #7a5646 */
+    --accent-foreground: 0 0% 100%; /* #ffffff */
+    --destructive: 0 75% 42%; /* #ba1a1a */
+    --destructive-foreground: 0 0% 100%; /* #ffffff */
+    --border: 15 17% 78%; /* #d4c3bc */
+    --input: 15 17% 78%; /* #d4c3bc */
+    --ring: 20 27% 38%; /* #7a5646 */
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    -webkit-tap-highlight-color: transparent;
+    min-height: max(884px, 100dvh);
+  }
+}
+
+@layer utilities {
+  .fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .fade-in-up-delay-1 { animation-delay: 0.2s; }
+  .fade-in-up-delay-2 { animation-delay: 0.4s; }
+  
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
