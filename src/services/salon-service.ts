@@ -396,6 +396,18 @@ const saveStoredBookings = (bookings: BookingWithRelations[]) => {
 export const salonService = {
   // ================= BRANCHES =================
   async getBranches(): Promise<Branch[]> {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await (supabase.from('branches') as any)
+          .select('*')
+          .order('created_at', { ascending: true });
+        if (!error && data && data.length > 0) {
+          return data as Branch[];
+        }
+      } catch (e) {
+        console.warn('Supabase getBranches error, using local data:', e);
+      }
+    }
     return getStoredBranches();
   },
 
@@ -411,12 +423,42 @@ export const salonService = {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+
+    if (isSupabaseConfigured) {
+      try {
+        const { data: inserted, error } = await (supabase.from('branches') as any)
+          .insert(branch)
+          .select()
+          .single();
+        if (!error && inserted) {
+          return inserted as Branch;
+        }
+      } catch (e) {
+        console.warn('Supabase createBranch error, saving locally:', e);
+      }
+    }
+
     const branches = [branch, ...getStoredBranches()];
     saveStoredBranches(branches);
     return branch;
   },
 
   async updateBranch(id: string, updates: Partial<Branch>): Promise<Branch | null> {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await (supabase.from('branches') as any)
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) {
+          return data as Branch;
+        }
+      } catch (e) {
+        console.warn('Supabase updateBranch error, saving locally:', e);
+      }
+    }
+
     const branches = getStoredBranches();
     const index = branches.findIndex((b) => b.id === id);
     if (index === -1) return null;
@@ -426,6 +468,13 @@ export const salonService = {
   },
 
   async deleteBranch(id: string): Promise<boolean> {
+    if (isSupabaseConfigured) {
+      try {
+        await (supabase.from('branches') as any).delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteBranch error:', e);
+      }
+    }
     const branches = getStoredBranches().filter((b) => b.id !== id);
     saveStoredBranches(branches);
     return true;
@@ -433,6 +482,21 @@ export const salonService = {
 
   // ================= STYLISTS =================
   async getStylists(branchId?: string): Promise<Stylist[]> {
+    if (isSupabaseConfigured) {
+      try {
+        let query = (supabase.from('stylists') as any).select('*').order('rating', { ascending: false });
+        if (branchId) {
+          query = query.eq('branch_id', branchId).eq('is_active', true);
+        }
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) {
+          return data as Stylist[];
+        }
+      } catch (e) {
+        console.warn('Supabase getStylists error, using local data:', e);
+      }
+    }
+
     const stylists = getStoredStylists();
     if (branchId) {
       return stylists.filter((s) => s.branch_id === branchId && s.is_active);
@@ -452,12 +516,42 @@ export const salonService = {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+
+    if (isSupabaseConfigured) {
+      try {
+        const { data: inserted, error } = await (supabase.from('stylists') as any)
+          .insert(stylist)
+          .select()
+          .single();
+        if (!error && inserted) {
+          return inserted as Stylist;
+        }
+      } catch (e) {
+        console.warn('Supabase createStylist error, saving locally:', e);
+      }
+    }
+
     const stylists = [stylist, ...getStoredStylists()];
     saveStoredStylists(stylists);
     return stylist;
   },
 
   async updateStylist(id: string, updates: Partial<Stylist>): Promise<Stylist | null> {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await (supabase.from('stylists') as any)
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) {
+          return data as Stylist;
+        }
+      } catch (e) {
+        console.warn('Supabase updateStylist error, saving locally:', e);
+      }
+    }
+
     const stylists = getStoredStylists();
     const index = stylists.findIndex((s) => s.id === id);
     if (index === -1) return null;
@@ -467,6 +561,13 @@ export const salonService = {
   },
 
   async deleteStylist(id: string): Promise<boolean> {
+    if (isSupabaseConfigured) {
+      try {
+        await (supabase.from('stylists') as any).delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deleteStylist error:', e);
+      }
+    }
     const stylists = getStoredStylists().filter((s) => s.id !== id);
     saveStoredStylists(stylists);
     return true;
@@ -587,6 +688,43 @@ export const salonService = {
     stylistId?: string;
     depositStatus?: DepositStatus | 'all';
   }): Promise<BookingWithRelations[]> {
+    if (isSupabaseConfigured) {
+      try {
+        let query = (supabase.from('bookings') as any).select('*').order('created_at', { ascending: false });
+        if (filters?.customerId) query = query.eq('customer_id', filters.customerId);
+        if (filters?.status && filters.status !== 'all') query = query.eq('status', filters.status);
+        if (filters?.branchId && filters.branchId !== 'all') query = query.eq('branch_id', filters.branchId);
+        if (filters?.stylistId && filters.stylistId !== 'all') query = query.eq('stylist_id', filters.stylistId);
+        if (filters?.depositStatus && filters.depositStatus !== 'all') query = query.eq('deposit_status', filters.depositStatus);
+
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) {
+          const allServices = await this.getServices();
+          const allBranches = await this.getBranches();
+          const allStylists = await this.getStylists();
+
+          return data.map((b: any) => {
+            const svcIds = b.service_ids || (b.service_id ? [b.service_id] : []);
+            const matchedServices = allServices.filter((s) => svcIds.includes(s.id));
+            const primaryService = matchedServices[0] || allServices.find((s) => s.id === b.service_id) || allServices[0];
+            const branch = allBranches.find((br) => br.id === b.branch_id);
+            const stylist = allStylists.find((st) => st.id === b.stylist_id);
+
+            return {
+              ...b,
+              services: matchedServices,
+              service: primaryService,
+              branch,
+              stylist,
+              customer: b.customer_profile || DEMO_CUSTOMER,
+            } as BookingWithRelations;
+          });
+        }
+      } catch (e) {
+        console.warn('Supabase getBookings error, using local data:', e);
+      }
+    }
+
     let bookings = getStoredBookings();
     if (filters?.customerId) {
       bookings = bookings.filter((b) => b.customer_id === filters.customerId);
@@ -658,6 +796,31 @@ export const salonService = {
       customer: bookingData.customerProfile,
     };
 
+    if (isSupabaseConfigured) {
+      try {
+        await (supabase.from('bookings') as any).insert({
+          id: newBooking.id,
+          customer_id: newBooking.customer_id,
+          customer_profile: newBooking.customer,
+          branch_id: newBooking.branch_id,
+          service_id: newBooking.service_id,
+          service_ids: newBooking.service_ids,
+          stylist_id: newBooking.stylist_id,
+          booking_date: newBooking.booking_date,
+          booking_time: newBooking.booking_time,
+          total_duration_minutes: newBooking.total_duration_minutes,
+          total_price: newBooking.total_price,
+          deposit_amount: newBooking.deposit_amount,
+          deposit_status: newBooking.deposit_status,
+          slip_url: newBooking.slip_url,
+          status: newBooking.status,
+          note: newBooking.note,
+        });
+      } catch (e) {
+        console.warn('Supabase createBooking error, saving locally:', e);
+      }
+    }
+
     const bookings = getStoredBookings();
     const updated = [newBooking, ...bookings];
     saveStoredBookings(updated);
@@ -665,6 +828,16 @@ export const salonService = {
   },
 
   async updateBookingStatus(bookingId: string, status: BookingStatus): Promise<BookingWithRelations | null> {
+    if (isSupabaseConfigured) {
+      try {
+        await (supabase.from('bookings') as any)
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq('id', bookingId);
+      } catch (e) {
+        console.warn('Supabase updateBookingStatus error:', e);
+      }
+    }
+
     const bookings = getStoredBookings();
     const index = bookings.findIndex((b) => b.id === bookingId);
     if (index === -1) return null;
@@ -679,6 +852,21 @@ export const salonService = {
   },
 
   async verifyDepositSlip(bookingId: string, status: 'verified' | 'rejected'): Promise<BookingWithRelations | null> {
+    const newStatus = status === 'verified' ? 'confirmed' : 'pending';
+    if (isSupabaseConfigured) {
+      try {
+        await (supabase.from('bookings') as any)
+          .update({ 
+            deposit_status: status, 
+            status: newStatus,
+            updated_at: new Date().toISOString() 
+          })
+          .eq('id', bookingId);
+      } catch (e) {
+        console.warn('Supabase verifyDepositSlip error:', e);
+      }
+    }
+
     const bookings = getStoredBookings();
     const index = bookings.findIndex((b) => b.id === bookingId);
     if (index === -1) return null;
@@ -694,6 +882,21 @@ export const salonService = {
   },
 
   async rescheduleBooking(bookingId: string, newDate: string, newTime: string): Promise<BookingWithRelations | null> {
+    if (isSupabaseConfigured) {
+      try {
+        await (supabase.from('bookings') as any)
+          .update({ 
+            booking_date: newDate, 
+            booking_time: newTime,
+            status: 'pending',
+            updated_at: new Date().toISOString() 
+          })
+          .eq('id', bookingId);
+      } catch (e) {
+        console.warn('Supabase rescheduleBooking error:', e);
+      }
+    }
+
     const bookings = getStoredBookings();
     const index = bookings.findIndex((b) => b.id === bookingId);
     if (index === -1) return null;
