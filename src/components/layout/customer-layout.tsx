@@ -37,9 +37,9 @@ export function CustomerLayout() {
   };
 
   const navItems = [
-    { name: 'หน้าแรก', path: '/home', icon: Home },
-    { name: 'บริการทั้งหมด', path: '/home/services', icon: Scissors },
-    { name: 'การจองของฉัน', path: '/home/bookings', icon: Calendar },
+    { name: 'หน้าแรก', path: '/', icon: Home },
+    { name: 'บริการทั้งหมด', path: '/services', icon: Scissors },
+    { name: 'การจองของฉัน', path: '/bookings', icon: Calendar },
   ];
 
   return (
@@ -48,7 +48,7 @@ export function CustomerLayout() {
       <header className="sticky top-0 z-40 w-full border-b border-[#d4c3bc]/50 bg-[#f5f0ea]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           {/* Brand Logo */}
-          <Link to="/home" className="flex items-center gap-2.5">
+          <Link to="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-[#7a5646] flex items-center justify-center text-white shadow-sm">
               <Sparkles className="w-4 h-4 text-amber-200" />
             </div>
@@ -115,7 +115,7 @@ export function CustomerLayout() {
 
                     <div className="py-1">
                       <Link
-                        to="/home/bookings"
+                        to="/bookings"
                         onClick={() => setMenuOpen(false)}
                         className="w-full px-4 py-2 text-left text-xs text-[#7a5646] hover:bg-[#f5f0ea] flex items-center gap-2 font-medium"
                       >
@@ -140,7 +140,7 @@ export function CustomerLayout() {
                         onClick={() => {
                           setMenuOpen(false);
                           logout();
-                          navigate('/home');
+                          navigate('/');
                         }}
                         className="w-full px-4 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2"
                       >

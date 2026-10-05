@@ -34,6 +34,9 @@ export const useAuthStore = create<AuthState>()(
         if (state?.user?.display_name?.includes('มินตรา') || state?.user?.line_user_id === 'demo_customer_line_id') {
           state.user = null;
           state.isAuthenticated = false;
+          try {
+            localStorage.removeItem('kiki-auth-storage');
+          } catch {}
         }
       },
     }

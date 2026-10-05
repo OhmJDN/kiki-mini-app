@@ -713,7 +713,7 @@ export function ServicesPage() {
               <Button
                 onClick={() => {
                   setShowSuccessModal(false);
-                  navigate('/home/bookings');
+                  navigate('/bookings');
                 }}
                 className="w-full bg-[#7a5646] hover:bg-[#634335] text-white rounded-xl py-5 text-xs font-semibold"
               >
@@ -723,7 +723,7 @@ export function ServicesPage() {
                 variant="ghost"
                 onClick={() => {
                   setShowSuccessModal(false);
-                  navigate('/home');
+                  navigate('/');
                 }}
                 className="w-full text-xs text-[#636260]"
               >

@@ -6,7 +6,6 @@ import { authenticateWithLine } from './features/auth/auth-service';
 import { CustomerLayout } from './components/layout/customer-layout';
 import { AdminLayout } from './components/layout/admin-layout';
 
-import { LandingPage } from './pages/customer/landing';
 import { Home } from './pages/customer/home';
 import { ServicesPage } from './pages/customer/services';
 import { BookingsPage } from './pages/customer/bookings';
@@ -37,19 +36,17 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          {/* Public Landing Page */}
-          <Route path="/" element={<LandingPage />} />
-
-          {/* Quick Shortcuts */}
-          <Route path="/services" element={<Navigate to="/home/services" replace />} />
-          <Route path="/bookings" element={<Navigate to="/home/bookings" replace />} />
-
-          {/* Customer Routes */}
-          <Route path="/home" element={<CustomerLayout />}>
+          {/* Customer Routes (Direct Root for LINE Mini App) */}
+          <Route path="/" element={<CustomerLayout />}>
             <Route index element={<Home />} />
             <Route path="services" element={<ServicesPage />} />
             <Route path="bookings" element={<BookingsPage />} />
           </Route>
+
+          {/* Legacy / Alias Redirects */}
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/home/services" element={<Navigate to="/services" replace />} />
+          <Route path="/home/bookings" element={<Navigate to="/bookings" replace />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

@@ -51,7 +51,7 @@ export function Home() {
           </p>
 
           <Button asChild className="bg-amber-100 hover:bg-white text-[#4a342a] font-semibold rounded-full px-6 shadow-md">
-            <Link to="/home/services">
+            <Link to="/services">
               จองบริการทันที <ChevronRight className="ml-1.5 w-4 h-4" />
             </Link>
           </Button>
@@ -83,7 +83,7 @@ export function Home() {
             </div>
 
             <Button asChild variant="outline" size="sm" className="border-amber-400 text-amber-900 hover:bg-amber-100 rounded-full text-xs">
-              <Link to="/home/bookings">ดูรายละเอียดนัดหมาย</Link>
+              <Link to="/bookings">ดูรายละเอียดนัดหมาย</Link>
             </Button>
           </CardContent>
         </Card>
@@ -91,7 +91,7 @@ export function Home() {
 
       {/* Quick Action Navigation */}
       <div className="grid grid-cols-2 gap-4">
-        <Link to="/home/services" className="group">
+        <Link to="/services" className="group">
           <Card className="hover:border-[#7a5646]/60 hover:shadow-md transition-all bg-card h-full border-[#d4c3bc]/60">
             <CardContent className="flex flex-col items-center justify-center p-6 text-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-[#7a5646]/10 group-hover:bg-[#7a5646]/20 transition-colors flex items-center justify-center text-[#7a5646]">
@@ -105,7 +105,7 @@ export function Home() {
           </Card>
         </Link>
 
-        <Link to="/home/bookings" className="group">
+        <Link to="/bookings" className="group">
           <Card className="hover:border-[#7a5646]/60 hover:shadow-md transition-all bg-card h-full border-[#d4c3bc]/60">
             <CardContent className="flex flex-col items-center justify-center p-6 text-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-[#7a5646]/10 group-hover:bg-[#7a5646]/20 transition-colors flex items-center justify-center text-[#7a5646]">
@@ -128,7 +128,7 @@ export function Home() {
             <p className="text-xs text-[#636260]">บริการที่ลูกค้าเลือกจองและประทับใจมากที่สุด</p>
           </div>
           <Button variant="link" className="text-[#7a5646] p-0 h-auto text-xs sm:text-sm font-semibold" asChild>
-            <Link to="/home/services">ดูทั้งหมด →</Link>
+            <Link to="/services">ดูทั้งหมด →</Link>
           </Button>
         </div>
 
@@ -160,7 +160,7 @@ export function Home() {
                   size="sm"
                   className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full text-xs px-3.5 h-8 flex-shrink-0"
                 >
-                  <Link to={`/home/services?book=${service.id}`}>จอง</Link>
+                  <Link to={`/services?book=${service.id}`}>จอง</Link>
                 </Button>
               </div>
             </Card>
