@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { salonService } from '@/services/salon-service';
 import { useAuthStore } from '@/stores/auth-store';
-import { loginAsDemo } from '@/features/auth/auth-service';
+import { authenticateWithLine } from '@/features/auth/auth-service';
 import type { BookingWithRelations } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,18 +41,32 @@ export function BookingsPage() {
   const [isSubmittingReschedule, setIsSubmittingReschedule] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      loginAsDemo('customer').then(() => loadBookings());
-    } else {
-      loadBookings();
-    }
+    const initCustomer = async () => {
+      let activeUser = user;
+      if (!activeUser || activeUser.line_user_id?.startsWith('demo_')) {
+        const lineUser = await authenticateWithLine();
+        if (lineUser) {
+          activeUser = lineUser;
+        }
+      }
+      if (activeUser) {
+        loadBookings(activeUser.id);
+      } else {
+        setIsLoading(false);
+      }
+    };
+    initCustomer();
   }, [user]);
 
-  const loadBookings = async () => {
-    if (!user) return;
+  const loadBookings = async (userId?: string) => {
+    const targetId = userId || user?.id;
+    if (!targetId) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
-      const data = await salonService.getBookings({ customerId: user.id });
+      const data = await salonService.getBookings({ customerId: targetId });
       setBookings(data);
     } finally {
       setIsLoading(false);

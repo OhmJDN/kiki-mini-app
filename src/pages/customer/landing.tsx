@@ -1,27 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
-import { loginAsDemo, authenticateWithLine } from '@/features/auth/auth-service';
-import { isLiffConfigured, isInLiffBrowser } from '@/lib/liff';
+import { authenticateWithLine } from '@/features/auth/auth-service';
+import { isLiffConfigured, isInLiffBrowser, loginWithLine } from '@/lib/liff';
 import { Button } from '@/components/ui/button';
 import { Scissors, Sparkles, ShieldCheck, ArrowRight, Clock, Star } from 'lucide-react';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [loadingRole, setLoadingRole] = useState<'customer' | 'line' | null>(null);
 
   useEffect(() => {
-    // If opened inside LINE LIFF or already logged in as customer, go directly to customer app
-    if (isInLiffBrowser() || isAuthenticated) {
+    // If opened inside LINE LIFF or already logged in as real customer, go directly to customer app
+    const isDemo = user?.line_user_id?.startsWith('demo_') || user?.display_name?.includes('มินตรา');
+    if (isInLiffBrowser() || (isAuthenticated && !isDemo)) {
       navigate('/home', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const handleStartBooking = async () => {
     setLoadingRole('customer');
     try {
-      await loginAsDemo('customer');
+      if (isLiffConfigured) {
+        await authenticateWithLine();
+      }
       navigate('/home/services');
     } finally {
       setLoadingRole(null);
@@ -31,8 +34,12 @@ export function LandingPage() {
   const handleLineLogin = async () => {
     setLoadingRole('line');
     try {
-      await authenticateWithLine();
-      navigate('/home');
+      if (isInLiffBrowser()) {
+        await authenticateWithLine(true);
+        navigate('/home');
+      } else {
+        await loginWithLine();
+      }
     } finally {
       setLoadingRole(null);
     }

@@ -1,36 +1,62 @@
 import liff from '@line/liff';
 
-const liffId = import.meta.env.VITE_LIFF_ID;
+const LIFF_ID_FALLBACK = '2011817864-sqDKjChb';
+const rawLiffId = import.meta.env.VITE_LIFF_ID;
+const liffId = (rawLiffId && rawLiffId !== 'your_liff_id_here' && !rawLiffId.includes('YOUR_LIFF')) 
+  ? rawLiffId 
+  : LIFF_ID_FALLBACK;
 
-export const isLiffConfigured = Boolean(
-  liffId && 
-  liffId !== 'your_liff_id_here' && 
-  !liffId.includes('YOUR_LIFF')
-);
+export const isLiffConfigured = Boolean(liffId);
+
+let liffInitPromise: Promise<void> | null = null;
 
 export const initializeLiff = async (): Promise<void> => {
   if (!isLiffConfigured) {
-    console.info('LIFF ID is not configured or in development mode.');
+    console.info('LIFF ID is not configured.');
     return;
   }
+  if (!liffInitPromise) {
+    liffInitPromise = liff.init({ liffId }).catch((error) => {
+      console.warn('LIFF initialization failed:', error);
+      liffInitPromise = null;
+    });
+  }
+  return liffInitPromise;
+};
+
+export const isInLineApp = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const ua = window.navigator.userAgent.toLowerCase();
+  return ua.includes('line') || (typeof liff !== 'undefined' && typeof liff.isInClient === 'function' && liff.isInClient());
+};
+
+export const isInLiffBrowser = (): boolean => {
   try {
-    await liff.init({ liffId });
-  } catch (error) {
-    console.warn('LIFF initialization failed:', error);
+    return liff.isInClient() || isInLineApp();
+  } catch {
+    return isInLineApp();
   }
 };
 
 export const getLiffProfile = async () => {
-  if (!liff.isLoggedIn()) {
-    liff.login();
+  await initializeLiff();
+  try {
+    if (!liff.isLoggedIn()) {
+      return null;
+    }
+    const profile = await liff.getProfile();
+    return profile;
+  } catch (error) {
+    console.warn('Failed to get LIFF profile:', error);
     return null;
   }
-  const profile = await liff.getProfile();
-  return profile;
 };
 
-export const isInLiffBrowser = (): boolean => {
-  return liff.isInClient();
+export const loginWithLine = async (): Promise<void> => {
+  await initializeLiff();
+  if (!liff.isLoggedIn()) {
+    liff.login();
+  }
 };
 
 export const closeLiff = (): void => {

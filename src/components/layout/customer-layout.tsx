@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
-import { loginAsDemo } from '@/features/auth/auth-service';
+import { authenticateWithLine } from '@/features/auth/auth-service';
+import { loginWithLine, isInLineApp } from '@/lib/liff';
 import { Toaster } from '@/components/ui/toaster';
 import { 
   Home, 
@@ -8,10 +10,10 @@ import {
   Scissors, 
   LogOut, 
   Sparkles, 
-  ChevronDown
+  ChevronDown,
+  LogIn
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 
 export function CustomerLayout() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -19,9 +21,19 @@ export function CustomerLayout() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // If not authenticated, provide automatic guest session so user can freely explore!
-  const handleAutoLoginCustomer = async () => {
-    await loginAsDemo('customer');
+  useEffect(() => {
+    // When inside LINE or if user has demo cache, automatically pull real LINE profile
+    if (isInLineApp() || !user || user.line_user_id?.startsWith('demo_') || user.display_name?.includes('มินตรา')) {
+      authenticateWithLine();
+    }
+  }, []);
+
+  const handleLogin = async () => {
+    if (isInLineApp()) {
+      await authenticateWithLine(true);
+    } else {
+      await loginWithLine();
+    }
   };
 
   const navItems = [
@@ -111,6 +123,19 @@ export function CustomerLayout() {
                         การจองคิวของฉัน
                       </Link>
 
+                      {user?.line_user_id?.startsWith('demo_') && (
+                        <button
+                          onClick={() => {
+                            setMenuOpen(false);
+                            handleLogin();
+                          }}
+                          className="w-full px-4 py-2 text-left text-xs text-[#06C755] hover:bg-emerald-50 flex items-center gap-2 font-medium"
+                        >
+                          <LogIn className="w-3.5 h-3.5" />
+                          เชื่อมต่อ LINE บัญชีจริง
+                        </button>
+                      )}
+
                       <button
                         onClick={() => {
                           setMenuOpen(false);
@@ -129,10 +154,11 @@ export function CustomerLayout() {
             ) : (
               <Button
                 size="sm"
-                onClick={handleAutoLoginCustomer}
-                className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full text-xs px-4"
+                onClick={handleLogin}
+                className="bg-[#06C755] hover:bg-[#05b34c] text-white rounded-full text-xs px-3.5 flex items-center gap-1.5 shadow-sm"
               >
-                เข้าสู่ระบบ
+                <LogIn className="w-3.5 h-3.5" />
+                เข้าสู่ระบบด้วย LINE
               </Button>
             )}
           </div>

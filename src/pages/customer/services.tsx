@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { salonService } from '@/services/salon-service';
 import { useAuthStore } from '@/stores/auth-store';
-import { loginAsDemo } from '@/features/auth/auth-service';
+import { loginAsDemo, authenticateWithLine } from '@/features/auth/auth-service';
 import { sendBookingChatMessage } from '@/lib/liff';
 import type { Service, ServiceCategory, Branch, Stylist } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -129,8 +129,13 @@ export function ServicesPage() {
   // Submit Booking
   const handleConfirmBooking = async () => {
     let currentUser = user;
-    if (!currentUser) {
-      currentUser = await loginAsDemo('customer');
+    if (!currentUser || currentUser.line_user_id?.startsWith('demo_')) {
+      const lineUser = await authenticateWithLine();
+      if (lineUser) {
+        currentUser = lineUser;
+      } else if (!currentUser) {
+        currentUser = await loginAsDemo('customer');
+      }
     }
     if (!currentUser || selectedServiceIds.length === 0) return;
 

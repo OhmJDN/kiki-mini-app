@@ -1,13 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-kiki.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+const SUPABASE_URL_FALLBACK = 'https://rfazxqrbxegubipqunta.supabase.co';
+const SUPABASE_KEY_FALLBACK = 'sb_publishable_tCovXEBLFfbXl0AZXCIOiA_4zkwGf1-';
+
+const rawUrl = import.meta.env.VITE_SUPABASE_URL;
+const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const supabaseUrl = (rawUrl && !rawUrl.includes('your_supabase_url') && !rawUrl.includes('placeholder'))
+  ? rawUrl
+  : SUPABASE_URL_FALLBACK;
+
+const supabaseAnonKey = (rawKey && !rawKey.includes('placeholder-anon-key'))
+  ? rawKey
+  : SUPABASE_KEY_FALLBACK;
 
 export const isSupabaseConfigured = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && 
-  import.meta.env.VITE_SUPABASE_ANON_KEY &&
-  !import.meta.env.VITE_SUPABASE_URL.includes('your_supabase_url')
+  supabaseUrl && 
+  supabaseAnonKey &&
+  !supabaseUrl.includes('placeholder')
 );
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
