@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { salonService } from '@/services/salon-service';
 import { useAuthStore } from '@/stores/auth-store';
+import { loginAsDemo } from '@/features/auth/auth-service';
 import type { BookingWithRelations } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,7 +41,11 @@ export function BookingsPage() {
   const [isSubmittingReschedule, setIsSubmittingReschedule] = useState(false);
 
   useEffect(() => {
-    loadBookings();
+    if (!user) {
+      loginAsDemo('customer').then(() => loadBookings());
+    } else {
+      loadBookings();
+    }
   }, [user]);
 
   const loadBookings = async () => {

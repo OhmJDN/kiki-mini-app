@@ -50,79 +50,68 @@ export const authenticateWithLine = async (): Promise<Profile | null> => {
       return null;
     }
 
-    if (!isSupabaseConfigured) {
-      const syntheticProfile: Profile = {
-        id: lineProfile.userId,
-        line_user_id: lineProfile.userId,
-        display_name: lineProfile.displayName,
-        picture_url: lineProfile.pictureUrl || null,
-        phone: null,
-        role: 'customer',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      setUser(syntheticProfile);
-      setLoading(false);
-      return syntheticProfile;
-    }
+    if (isSupabaseConfigured) {
+      try {
+        // Query profile by line_user_id
+        const { data: existingProfile } = await (supabase.from('profiles') as any)
+          .select('*')
+          .eq('line_user_id', lineProfile.userId)
+          .maybeSingle();
 
-    const email = `line_${lineProfile.userId}@kiki.line.local`;
-    const password = `kiki_${lineProfile.userId}_secure`;
+        if (existingProfile) {
+          // Update display name and avatar from LINE if updated
+          await (supabase.from('profiles') as any)
+            .update({
+              display_name: lineProfile.displayName,
+              picture_url: lineProfile.pictureUrl || existingProfile.picture_url,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingProfile.id);
 
-    let authedUserId: string | null = null;
-
-    const signInRes = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInRes.data?.user) {
-      authedUserId = signInRes.data.user.id;
-    } else {
-      const signUpRes = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (signUpRes.error) throw signUpRes.error;
-      if (signUpRes.data?.user) {
-        authedUserId = signUpRes.data.user.id;
-        await (supabase.from('profiles') as unknown as { insert: (row: Record<string, unknown>) => Promise<{ error: unknown }> }).insert({
-          id: authedUserId,
-          line_user_id: lineProfile.userId,
-          display_name: lineProfile.displayName,
-          picture_url: lineProfile.pictureUrl || null,
-          role: 'customer',
-        });
-      }
-    }
-
-    if (authedUserId) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authedUserId)
-        .single();
-
-      if (profile) {
-        const typedProfile = profile as unknown as Profile;
-        await (supabase.from('profiles') as unknown as { update: (row: Record<string, unknown>) => { eq: (f: string, v: string) => Promise<unknown> } })
-          .update({
+          const updated: Profile = {
+            ...existingProfile,
             display_name: lineProfile.displayName,
-            picture_url: lineProfile.pictureUrl || null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', authedUserId);
+            picture_url: lineProfile.pictureUrl || existingProfile.picture_url,
+          };
+          setUser(updated);
+          setLoading(false);
+          return updated;
+        } else {
+          // Insert new customer profile in Supabase
+          const { data: newProfile, error: insErr } = await (supabase.from('profiles') as any)
+            .insert({
+              line_user_id: lineProfile.userId,
+              display_name: lineProfile.displayName,
+              picture_url: lineProfile.pictureUrl || null,
+              role: 'customer',
+            })
+            .select()
+            .single();
 
-        typedProfile.display_name = lineProfile.displayName;
-        typedProfile.picture_url = lineProfile.pictureUrl || null;
-        setUser(typedProfile);
-        return typedProfile;
+          if (!insErr && newProfile) {
+            setUser(newProfile as Profile);
+            setLoading(false);
+            return newProfile as Profile;
+          }
+        }
+      } catch (e) {
+        console.warn('Supabase profile sync error, fallback to synthetic:', e);
       }
     }
 
+    const syntheticProfile: Profile = {
+      id: lineProfile.userId,
+      line_user_id: lineProfile.userId,
+      display_name: lineProfile.displayName,
+      picture_url: lineProfile.pictureUrl || null,
+      phone: null,
+      role: 'customer',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setUser(syntheticProfile);
     setLoading(false);
-    return null;
+    return syntheticProfile;
   } catch (error) {
     console.warn('Authentication with LINE/Supabase error, continuing:', error);
     setLoading(false);
@@ -134,57 +123,44 @@ export const loginAsDemo = async (role: 'customer' | 'admin'): Promise<Profile |
   const { setUser, setLoading } = useAuthStore.getState();
   setLoading(true);
 
-  // If Supabase is configured, attempt real auth
   if (isSupabaseConfigured) {
     try {
-      const email = `demo_${role}@kiki.line.local`;
-      const password = `kiki_demo_${role}_secure`;
+      const demoLineId = `demo_${role}_line_id`;
+      const { data: existingProfile } = await (supabase.from('profiles') as any)
+        .select('*')
+        .eq('line_user_id', demoLineId)
+        .maybeSingle();
 
-      let authedUserId: string | null = null;
-      const signInRes = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInRes.data?.user) {
-        authedUserId = signInRes.data.user.id;
+      if (existingProfile) {
+        setUser(existingProfile as Profile);
+        setLoading(false);
+        return existingProfile as Profile;
       } else {
-        const signUpRes = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (signUpRes.data?.user) {
-          authedUserId = signUpRes.data.user.id;
-          await (supabase.from('profiles') as unknown as { insert: (row: Record<string, unknown>) => Promise<{ error: unknown }> }).insert({
-            id: authedUserId,
-            line_user_id: `demo_${role}`,
+        const { data: newProfile } = await (supabase.from('profiles') as any)
+          .insert({
+            line_user_id: demoLineId,
             display_name: role === 'admin' ? 'ผู้จัดการร้าน KIKI' : 'คุณมินตรา (ลูกค้าคนพิเศษ)',
-            picture_url: null,
+            picture_url: role === 'admin' 
+              ? 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150' 
+              : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+            phone: role === 'admin' ? '089-876-5432' : '081-234-5678',
             role,
-          });
-        }
-      }
-
-      if (authedUserId) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authedUserId)
+          })
+          .select()
           .single();
 
-        if (profile) {
-          const typedProfile = profile as unknown as Profile;
-          setUser(typedProfile);
-          return typedProfile;
+        if (newProfile) {
+          setUser(newProfile as Profile);
+          setLoading(false);
+          return newProfile as Profile;
         }
       }
     } catch (e) {
-      console.warn('Supabase demo login error, falling back to local demo profile:', e);
+      console.warn('Supabase demo sync error, using local demo profile:', e);
     }
   }
 
-  // Graceful fallback to local demo profile
+  // Fallback to local demo profile
   const mockProfile = role === 'admin' ? DEMO_ADMIN : DEMO_CUSTOMER;
   setUser(mockProfile);
   setLoading(false);
