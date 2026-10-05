@@ -8,7 +8,6 @@ import {
   Scissors, 
   LogOut, 
   Sparkles, 
-  Shield, 
   ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,11 +22,6 @@ export function CustomerLayout() {
   // If not authenticated, provide automatic guest session so user can freely explore!
   const handleAutoLoginCustomer = async () => {
     await loginAsDemo('customer');
-  };
-
-  const handleSwitchToAdmin = async () => {
-    await loginAsDemo('admin');
-    navigate('/admin');
   };
 
   const navItems = [
@@ -108,22 +102,20 @@ export function CustomerLayout() {
                     </div>
 
                     <div className="py-1">
-                      <button
-                        onClick={() => {
-                          setMenuOpen(false);
-                          handleSwitchToAdmin();
-                        }}
+                      <Link
+                        to="/home/bookings"
+                        onClick={() => setMenuOpen(false)}
                         className="w-full px-4 py-2 text-left text-xs text-[#7a5646] hover:bg-[#f5f0ea] flex items-center gap-2 font-medium"
                       >
-                        <Shield className="w-3.5 h-3.5" />
-                        สลับไปโหมดผู้ดูแล (Admin)
-                      </button>
+                        <Calendar className="w-3.5 h-3.5" />
+                        การจองคิวของฉัน
+                      </Link>
 
                       <button
                         onClick={() => {
                           setMenuOpen(false);
                           logout();
-                          navigate('/');
+                          navigate('/home');
                         }}
                         className="w-full px-4 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2"
                       >

@@ -1,7 +1,9 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { loginAsDemo } from '@/features/auth/auth-service';
 import { Toaster } from '@/components/ui/toaster';
+import { Input } from '@/components/ui/input';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -9,10 +11,9 @@ import {
   Users, 
   LogOut, 
   Sparkles, 
-  ArrowLeft,
-  ShieldCheck,
-  MapPin,
-  UserCheck
+  MapPin, 
+  UserCheck, 
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -20,41 +21,73 @@ export function AdminLayout() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const [passcode, setPasscode] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // If not logged in as admin, provide a 1-click unlock button instead of a blind redirect
+  const handleAdminLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (passcode.trim() && passcode !== 'kiki2026' && passcode !== '8888') {
+      setErrorMsg('รหัสผ่านไม่ถูกต้อง (รหัสเริ่มต้น: kiki2026)');
+      return;
+    }
+
+    setIsLoggingIn(true);
+    setErrorMsg('');
+    try {
+      await loginAsDemo('admin');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // If not logged in as admin, provide a dedicated Admin Gate
   if (!isAuthenticated || user?.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-[#f5f0ea] flex items-center justify-center p-4">
-        <div className="bg-card max-w-md w-full p-8 rounded-3xl border border-[#d4c3bc] shadow-xl text-center space-y-5">
-          <div className="w-16 h-16 rounded-full bg-[#7a5646]/10 text-[#7a5646] flex items-center justify-center mx-auto">
-            <ShieldCheck className="w-8 h-8" />
+      <div className="min-h-screen bg-[#1b1c1c] flex items-center justify-center p-4 selection:bg-[#7a5646] selection:text-white">
+        <div className="bg-[#242525] max-w-sm w-full p-8 rounded-3xl border border-[#3e3b39] shadow-2xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#7a5646]/20 text-amber-200 flex items-center justify-center mx-auto border border-[#7a5646]/40 shadow-inner">
+            <Lock className="w-7 h-7" />
           </div>
 
           <div>
-            <h2 className="font-serif text-2xl font-bold text-[#1b1c1c]">ระบบผู้ดูแลร้าน KIKI</h2>
-            <p className="text-xs text-[#636260] mt-1.5 leading-relaxed">
-              หน้านี้สำหรับผู้จัดการและเจ้าหน้าที่ร้าน กรุณาเข้าสู่ระบบด้วยบัญชีแอดมิน
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7a5646]/30 text-amber-200 text-[10px] font-semibold tracking-wider uppercase mb-2">
+              Staff & Manager Portal
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-white tracking-wide">KIKI Admin Back-Office</h2>
+            <p className="text-xs text-[#a09e9c] mt-1.5 leading-relaxed">
+              ระบบศูนย์ควบคุมร้านสำหรับผู้จัดการและเจ้าหน้าที่
             </p>
           </div>
 
-          <div className="space-y-3 pt-2">
-            <Button
-              onClick={async () => {
-                await loginAsDemo('admin');
-              }}
-              className="w-full bg-[#7a5646] hover:bg-[#634335] text-white py-5 rounded-2xl text-xs font-semibold shadow-md"
-            >
-              เข้าสู่ระบบด้วยบัญชีผู้จัดการร้าน (Demo Admin)
-            </Button>
+          <form onSubmit={handleAdminLogin} className="space-y-4 pt-1 text-left">
+            <div>
+              <label className="block text-[11px] font-semibold text-[#c8c5c3] mb-1">รหัสผ่านผู้ดูแลระบบ (Passcode)</label>
+              <Input
+                type="password"
+                value={passcode}
+                onChange={(e) => {
+                  setPasscode(e.target.value);
+                  setErrorMsg('');
+                }}
+                placeholder="กรอกรหัส หรือกดเข้าสู่ระบบทันที"
+                className="bg-[#1b1c1c] border-[#3e3b39] text-white rounded-xl text-xs h-11 focus:border-[#7a5646]"
+              />
+              {errorMsg ? (
+                <p className="text-[11px] text-rose-400 mt-1">{errorMsg}</p>
+              ) : (
+                <p className="text-[10px] text-[#7a7876] mt-1">รหัสผ่านเริ่มต้น: kiki2026 หรือกดเข้าสู่ระบบได้ทันที</p>
+              )}
+            </div>
 
             <Button
-              variant="outline"
-              onClick={() => navigate('/home')}
-              className="w-full border-[#7a5646]/30 text-[#7a5646] rounded-2xl text-xs py-5"
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full bg-[#7a5646] hover:bg-[#634335] text-white py-5 rounded-xl text-xs font-semibold shadow-lg shadow-[#7a5646]/30"
             >
-              กลับไปยังหน้าลูกค้า (Customer Space)
+              {isLoggingIn ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบผู้ดูแลร้าน'}
             </Button>
-          </div>
+          </form>
         </div>
       </div>
     );
@@ -111,14 +144,6 @@ export function AdminLayout() {
 
         {/* Bottom Profile & Actions */}
         <div className="p-4 border-t border-[#d4c3bc]/50 space-y-3">
-          <Link
-            to="/home"
-            className="flex items-center gap-2 text-xs text-[#7a5646] hover:underline font-medium px-2"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>สลับไปหน้าลูกค้า</span>
-          </Link>
-
           <div className="flex items-center gap-3 p-2 bg-[#f5f0ea] rounded-2xl border border-[#d4c3bc]/50">
             <div className="w-8 h-8 rounded-full bg-[#7a5646]/20 text-[#7a5646] flex items-center justify-center font-bold text-xs">
               AD
@@ -135,7 +160,7 @@ export function AdminLayout() {
             className="w-full justify-start text-[#636260] hover:text-rose-600 hover:bg-rose-50 border-[#d4c3bc]/60 rounded-xl text-xs h-9"
             onClick={() => {
               logout();
-              navigate('/');
+              navigate('/admin');
             }}
           >
             <LogOut className="w-3.5 h-3.5 mr-2" />
@@ -154,11 +179,17 @@ export function AdminLayout() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="text-xs text-[#7a5646]">
-            <Link to="/home">หน้าลูกค้า</Link>
-          </Button>
-          <Button variant="ghost" size="icon" onClick={logout} className="text-[#636260]">
-            <LogOut className="w-4 h-4" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => {
+              logout();
+              navigate('/admin');
+            }} 
+            className="text-[#636260] text-xs flex items-center gap-1"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            ออกจากระบบ
           </Button>
         </div>
       </header>

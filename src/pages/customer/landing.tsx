@@ -1,25 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { loginAsDemo, authenticateWithLine } from '@/features/auth/auth-service';
-import { isLiffConfigured } from '@/lib/liff';
+import { isLiffConfigured, isInLiffBrowser } from '@/lib/liff';
 import { Button } from '@/components/ui/button';
 import { Scissors, Sparkles, ShieldCheck, ArrowRight, Clock, Star } from 'lucide-react';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
-  const [loadingRole, setLoadingRole] = useState<'customer' | 'admin' | 'line' | null>(null);
+  const { isAuthenticated } = useAuthStore();
+  const [loadingRole, setLoadingRole] = useState<'customer' | 'line' | null>(null);
 
-  const handleDemoLogin = async (role: 'customer' | 'admin') => {
-    setLoadingRole(role);
+  useEffect(() => {
+    // If opened inside LINE LIFF or already logged in as customer, go directly to customer app
+    if (isInLiffBrowser() || isAuthenticated) {
+      navigate('/home', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleStartBooking = async () => {
+    setLoadingRole('customer');
     try {
-      await loginAsDemo(role);
-      if (role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/home');
-      }
+      await loginAsDemo('customer');
+      navigate('/home/services');
     } finally {
       setLoadingRole(null);
     }
@@ -28,12 +31,8 @@ export function LandingPage() {
   const handleLineLogin = async () => {
     setLoadingRole('line');
     try {
-      const profile = await authenticateWithLine();
-      if (profile?.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/home');
-      }
+      await authenticateWithLine();
+      navigate('/home');
     } finally {
       setLoadingRole(null);
     }
@@ -57,30 +56,21 @@ export function LandingPage() {
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <Button
-                onClick={() => navigate(user?.role === 'admin' ? '/admin' : '/home')}
-                className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full px-5 shadow-sm"
+                onClick={() => navigate('/home')}
+                className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full px-5 shadow-sm text-xs font-semibold"
               >
-                เข้าสู่หน้าหลัก ({user?.role === 'admin' ? 'แอดมิน' : 'ลูกค้า'})
+                เข้าสู่หน้าบริการ
                 <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             ) : (
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
                   size="sm"
-                  onClick={() => handleDemoLogin('admin')}
+                  onClick={handleStartBooking}
                   disabled={loadingRole !== null}
-                  className="hidden sm:inline-flex border-[#7a5646]/30 text-[#7a5646] hover:bg-[#7a5646]/10 rounded-full"
+                  className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full px-5 shadow-sm text-xs"
                 >
-                  {loadingRole === 'admin' ? 'กำลังเข้าสู่ระบบ...' : 'โหมดแอดมิน (Admin)'}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleDemoLogin('customer')}
-                  disabled={loadingRole !== null}
-                  className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full px-4 shadow-sm"
-                >
-                  {loadingRole === 'customer' ? 'กำลังโหลด...' : 'ทดลองใช้งานลูกค้า'}
+                  {loadingRole === 'customer' ? 'กำลังโหลด...' : 'จองคิวบริการ'}
                 </Button>
               </div>
             )}
@@ -110,21 +100,20 @@ export function LandingPage() {
             {/* CTA Action Box */}
             <div className="bg-[#fcf9f8] p-6 rounded-2xl border border-[#d4c3bc]/60 shadow-lg shadow-[#7a5646]/5 flex flex-col sm:flex-row gap-4 max-w-lg mt-2">
               <Button
-                onClick={() => handleDemoLogin('customer')}
+                onClick={handleStartBooking}
                 disabled={loadingRole !== null}
                 className="flex-1 bg-[#7a5646] hover:bg-[#634335] text-white py-6 rounded-xl text-base font-medium shadow-md shadow-[#7a5646]/20"
               >
-                {loadingRole === 'customer' ? 'กำลังเชื่อมต่อ...' : 'จองคิวรับบริการ (ลูกค้า)'}
+                {loadingRole === 'customer' ? 'กำลังเชื่อมต่อ...' : 'เริ่มต้นจองคิวบริการ'}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
 
               <Button
                 variant="outline"
-                onClick={() => handleDemoLogin('admin')}
-                disabled={loadingRole !== null}
-                className="border-[#7a5646]/40 text-[#7a5646] hover:bg-[#7a5646]/10 py-6 rounded-xl text-base font-medium"
+                onClick={() => navigate('/home')}
+                className="border-[#7a5646]/40 text-[#7a5646] hover:bg-[#7a5646]/10 py-6 rounded-xl text-base font-medium px-6"
               >
-                {loadingRole === 'admin' ? 'กำลังเชื่อมต่อ...' : 'จัดการร้าน (แอดมิน)'}
+                ดูบริการทั้งหมด
               </Button>
             </div>
 
@@ -194,9 +183,7 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>© {new Date().getFullYear()} KIKI Beauty Space. สงวนลิขสิทธิ์ทุกประการ</p>
           <div className="flex gap-4">
-            <button onClick={() => handleDemoLogin('customer')} className="hover:underline">โหมดลูกค้า</button>
-            <span>•</span>
-            <button onClick={() => handleDemoLogin('admin')} className="hover:underline">โหมดแอดมิน</button>
+            <span className="text-[#7a5646] font-medium">KIKI Beauty Space • Bangkok</span>
           </div>
         </div>
       </footer>
