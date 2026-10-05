@@ -17,7 +17,7 @@ export function LandingPage() {
     if (isInLiffBrowser() || (isAuthenticated && !isDemo)) {
       navigate('/home', { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, []);
 
   const handleStartBooking = async () => {
     setLoadingRole('customer');

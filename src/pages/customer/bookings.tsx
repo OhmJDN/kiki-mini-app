@@ -56,7 +56,7 @@ export function BookingsPage() {
       }
     };
     initCustomer();
-  }, [user]);
+  }, [user?.id]);
 
   const loadBookings = async (userId?: string) => {
     const targetId = userId || user?.id;

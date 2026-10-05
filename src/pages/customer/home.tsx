@@ -15,7 +15,7 @@ export function Home() {
 
   useEffect(() => {
     loadHomeData();
-  }, [user]);
+  }, [user?.id]);
 
   const loadHomeData = async () => {
     const services = await salonService.getServices();

@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
-import { initializeLiff, getLiffProfile, isLiffConfigured, isInLineApp } from '../../lib/liff';
+import { initializeLiff, getLiffProfile, isLiffConfigured } from '../../lib/liff';
 import { useAuthStore } from '../../stores/auth-store';
 import type { Profile } from '../../types';
 
@@ -25,95 +25,123 @@ export const DEMO_ADMIN: Profile = {
   updated_at: new Date().toISOString(),
 };
 
+let authPromise: Promise<Profile | null> | null = null;
+let isAuthCompleted = false;
+
 export const authenticateWithLine = async (force: boolean = false): Promise<Profile | null> => {
   const { setUser, setLoading, user } = useAuthStore.getState();
 
   const isDemo = !user || user.line_user_id?.startsWith('demo_') || user.display_name?.includes('มินตรา');
-  const inLine = isInLineApp();
 
-  // If already authenticated with a real LINE ID and not in LINE refresh/force
-  if (user && !isDemo && !force && !inLine) {
+  // If already authenticated with a real LINE ID and not forced, DO NOT re-authenticate!
+  if (user && !isDemo && !force) {
     setLoading(false);
     return user;
   }
 
-  if (!isLiffConfigured) {
+  // If already ran and finished (and not forced), return existing user
+  if (isAuthCompleted && !force) {
     setLoading(false);
-    return isDemo ? null : user;
+    return user;
   }
 
-  setLoading(true);
+  // Deduplicate concurrent in-flight requests
+  if (authPromise && !force) {
+    return authPromise;
+  }
 
-  try {
-    await initializeLiff();
-    const lineProfile = await getLiffProfile();
-
-    if (!lineProfile) {
+  authPromise = (async () => {
+    if (!isLiffConfigured) {
       setLoading(false);
-      // If we couldn't get LINE profile (e.g. desktop external browser), keep existing or null
-      return user;
+      return isDemo ? null : user;
     }
 
-    let realProfile: Profile = {
-      id: lineProfile.userId,
-      line_user_id: lineProfile.userId,
-      display_name: lineProfile.displayName,
-      picture_url: lineProfile.pictureUrl || null,
-      phone: user?.phone || null,
-      role: 'customer',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+    setLoading(true);
 
-    if (isSupabaseConfigured) {
-      try {
-        const { data: existingProfile } = await (supabase.from('profiles') as any)
-          .select('*')
-          .eq('line_user_id', lineProfile.userId)
-          .maybeSingle();
+    try {
+      await initializeLiff();
+      const lineProfile = await getLiffProfile();
 
-        if (existingProfile) {
-          await (supabase.from('profiles') as any)
-            .update({
+      if (!lineProfile) {
+        setLoading(false);
+        isAuthCompleted = true;
+        return isDemo ? null : user;
+      }
+
+      // If user in store already matches LINE profile, avoid triggering state change
+      if (user && user.line_user_id === lineProfile.userId && user.display_name === lineProfile.displayName) {
+        setLoading(false);
+        isAuthCompleted = true;
+        return user;
+      }
+
+      let realProfile: Profile = {
+        id: lineProfile.userId,
+        line_user_id: lineProfile.userId,
+        display_name: lineProfile.displayName,
+        picture_url: lineProfile.pictureUrl || null,
+        phone: user?.phone || null,
+        role: 'customer',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      if (isSupabaseConfigured) {
+        try {
+          const { data: existingProfile } = await (supabase.from('profiles') as any)
+            .select('*')
+            .eq('line_user_id', lineProfile.userId)
+            .maybeSingle();
+
+          if (existingProfile) {
+            await (supabase.from('profiles') as any)
+              .update({
+                display_name: lineProfile.displayName,
+                picture_url: lineProfile.pictureUrl || existingProfile.picture_url,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', existingProfile.id);
+
+            realProfile = {
+              ...existingProfile,
               display_name: lineProfile.displayName,
               picture_url: lineProfile.pictureUrl || existingProfile.picture_url,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', existingProfile.id);
+            };
+          } else {
+            const { data: newProfile, error: insErr } = await (supabase.from('profiles') as any)
+              .insert({
+                line_user_id: lineProfile.userId,
+                display_name: lineProfile.displayName,
+                picture_url: lineProfile.pictureUrl || null,
+                role: 'customer',
+              })
+              .select()
+              .single();
 
-          realProfile = {
-            ...existingProfile,
-            display_name: lineProfile.displayName,
-            picture_url: lineProfile.pictureUrl || existingProfile.picture_url,
-          };
-        } else {
-          const { data: newProfile, error: insErr } = await (supabase.from('profiles') as any)
-            .insert({
-              line_user_id: lineProfile.userId,
-              display_name: lineProfile.displayName,
-              picture_url: lineProfile.pictureUrl || null,
-              role: 'customer',
-            })
-            .select()
-            .single();
-
-          if (!insErr && newProfile) {
-            realProfile = newProfile as Profile;
+            if (!insErr && newProfile) {
+              realProfile = newProfile as Profile;
+            }
           }
+        } catch (e) {
+          console.warn('Supabase profile sync error, fallback to realProfile:', e);
         }
-      } catch (e) {
-        console.warn('Supabase profile sync error, fallback to realProfile:', e);
       }
-    }
 
-    setUser(realProfile);
-    setLoading(false);
-    return realProfile;
-  } catch (error) {
-    console.warn('Authentication with LINE/Supabase error, continuing:', error);
-    setLoading(false);
-    return null;
-  }
+      setUser(realProfile);
+      setLoading(false);
+      isAuthCompleted = true;
+      return realProfile;
+    } catch (error) {
+      console.warn('Authentication with LINE/Supabase error, continuing:', error);
+      setLoading(false);
+      isAuthCompleted = true;
+      return null;
+    }
+  })().finally(() => {
+    authPromise = null;
+  });
+
+  return authPromise;
 };
 
 export const loginAsDemo = async (role: 'customer' | 'admin'): Promise<Profile | null> => {

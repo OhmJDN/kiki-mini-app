@@ -9,17 +9,24 @@ const liffId = (rawLiffId && rawLiffId !== 'your_liff_id_here' && !rawLiffId.inc
 export const isLiffConfigured = Boolean(liffId);
 
 let liffInitPromise: Promise<void> | null = null;
+let isLiffInited = false;
 
 export const initializeLiff = async (): Promise<void> => {
   if (!isLiffConfigured) {
-    console.info('LIFF ID is not configured.');
+    return;
+  }
+  if (isLiffInited) {
     return;
   }
   if (!liffInitPromise) {
-    liffInitPromise = liff.init({ liffId }).catch((error) => {
-      console.warn('LIFF initialization failed:', error);
-      liffInitPromise = null;
-    });
+    liffInitPromise = (async () => {
+      try {
+        await liff.init({ liffId });
+        isLiffInited = true;
+      } catch (error) {
+        console.warn('LIFF initialization failed:', error);
+      }
+    })();
   }
   return liffInitPromise;
 };
