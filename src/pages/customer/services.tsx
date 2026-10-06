@@ -4,6 +4,7 @@ import { salonService } from '@/services/salon-service';
 import { useAuthStore } from '@/stores/auth-store';
 import { loginAsDemo, authenticateWithLine } from '@/features/auth/auth-service';
 import { sendBookingChatMessage } from '@/lib/liff';
+import { uploadSlip } from '@/lib/slip-upload';
 import type { Service, ServiceCategory, Branch, Stylist } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -71,7 +72,25 @@ export function ServicesPage() {
   // Step 3: Summary, Contact & Deposit Slip
   const [customerPhone, setCustomerPhone] = useState(user?.phone || '081-234-5678');
   const [bookingNote, setBookingNote] = useState('');
-  const [slipUploaded, setSlipUploaded] = useState(false);
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [slipPreview, setSlipPreview] = useState<string | null>(null);
+  const slipUploaded = slipFile !== null;
+
+  const handleSlipSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('กรุณาเลือกไฟล์รูปภาพ');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('ไฟล์ใหญ่เกิน 5MB');
+      return;
+    }
+    if (slipPreview) URL.revokeObjectURL(slipPreview);
+    setSlipFile(file);
+    setSlipPreview(URL.createObjectURL(file));
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -139,8 +158,24 @@ export function ServicesPage() {
     }
     if (!currentUser || selectedServiceIds.length === 0) return;
 
+    if (depositRequired && !slipFile) {
+      alert('กรุณาแนบสลิปโอนเงินมัดจำก่อนยืนยันการจอง');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      let slipUrl: string | null = null;
+      if (depositRequired && slipFile) {
+        try {
+          slipUrl = await uploadSlip(slipFile, currentUser.id);
+        } catch (uploadErr) {
+          console.error('Slip upload failed:', uploadErr);
+          alert('อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+          return;
+        }
+      }
+
       await salonService.createBooking({
         customerId: currentUser.id,
         customerProfile: { ...currentUser, phone: customerPhone },
@@ -150,8 +185,8 @@ export function ServicesPage() {
         bookingDate: selectedDate,
         bookingTime: selectedTime,
         depositAmount: depositRequired ? depositAmount : 0,
-        depositStatus: depositRequired ? (slipUploaded ? 'pending_verification' : 'pending_verification') : 'none',
-        slipUrl: slipUploaded ? 'https://images.unsplash.com/photo-1607344645866-009c320b5ab8?w=400&auto=format&fit=crop&q=80' : null,
+        depositStatus: depositRequired ? 'pending_verification' : 'none',
+        slipUrl,
         note: bookingNote ? `${bookingNote} (โทร: ${customerPhone})` : `(โทร: ${customerPhone})`,
       });
 
@@ -573,26 +608,37 @@ export function ServicesPage() {
                 <p className="text-[11px] text-muted-foreground">KIKI Beauty Space Co., Ltd.</p>
               </div>
 
-              {/* Upload Slip Simulator */}
+              {/* Upload Slip */}
               <div className="pt-2">
                 <label className="block text-xs font-semibold text-[#1b1c1c] mb-1.5">หลักฐานการโอนเงิน (สลิป):</label>
-                <div
-                  onClick={() => setSlipUploaded(!slipUploaded)}
-                  className={`p-4 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-colors ${
+                <label
+                  htmlFor="slip-file-input"
+                  className={`block p-4 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-colors ${
                     slipUploaded
                       ? 'bg-emerald-50 border-emerald-500 text-emerald-800'
                       : 'bg-card border-[#d4c3bc] hover:border-[#7a5646] text-[#636260]'
                   }`}
                 >
-                  <Upload className="w-6 h-6 mx-auto mb-1" />
+                  <input
+                    id="slip-file-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleSlipSelected}
+                  />
+                  {slipPreview ? (
+                    <img src={slipPreview} alt="สลิปโอนเงิน" className="max-h-48 mx-auto rounded-xl mb-2 object-contain" />
+                  ) : (
+                    <Upload className="w-6 h-6 mx-auto mb-1" />
+                  )}
                   {slipUploaded ? (
                     <span className="text-xs font-semibold flex items-center justify-center gap-1">
-                      <Check className="w-4 h-4" /> สลิปแนบเรียบร้อยแล้ว (คลิกเพื่อเปลี่ยน)
+                      <Check className="w-4 h-4" /> เลือกสลิปแล้ว (คลิกเพื่อเปลี่ยน)
                     </span>
                   ) : (
                     <span className="text-xs">คลิกเพื่ออัปโหลดรูปภาพสลิปโอนเงิน</span>
                   )}
-                </div>
+                </label>
               </div>
             </Card>
           )}
