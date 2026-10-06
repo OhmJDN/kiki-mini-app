@@ -9,7 +9,6 @@ import {
   Calendar, 
   Scissors, 
   LogOut, 
-  Sparkles, 
   ChevronDown,
   LogIn
 } from 'lucide-react';
@@ -48,13 +47,17 @@ export function CustomerLayout() {
       <header className="sticky top-0 z-40 w-full border-b border-[#d4c3bc]/50 bg-[#f5f0ea]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#7a5646] flex items-center justify-center text-white shadow-sm">
-              <Sparkles className="w-4 h-4 text-amber-200" />
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-full bg-[#1b1c1c] flex items-center justify-center p-1.5 shadow-sm border border-[#d4c3bc]/60">
+              <img 
+                src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" 
+                alt="KIKI Beauty Space Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
-              <span className="font-serif font-bold text-lg tracking-widest text-[#1b1c1c]">KIKI</span>
-              <span className="text-[10px] uppercase tracking-wider text-[#7a5646] block -mt-1 font-medium">Beauty Space</span>
+              <span className="font-serif font-bold text-lg tracking-widest text-[#1b1c1c] block leading-none">KIKI</span>
+              <span className="text-[9px] uppercase tracking-widest text-[#7a5646] font-semibold">BEAUTY SPACE</span>
             </div>
           </Link>
 

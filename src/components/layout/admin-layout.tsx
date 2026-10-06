@@ -10,7 +10,6 @@ import {
   Scissors, 
   Users, 
   LogOut, 
-  Sparkles, 
   MapPin, 
   UserCheck, 
   Lock
@@ -108,9 +107,7 @@ export function AdminLayout() {
       <aside className="hidden md:flex flex-col w-64 border-r border-[#d4c3bc]/60 bg-card">
         {/* Brand */}
         <div className="h-16 flex items-center px-6 border-b border-[#d4c3bc]/50 gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#7a5646] flex items-center justify-center text-white shadow-sm">
-            <Sparkles className="w-4 h-4 text-amber-200" />
-          </div>
+          <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-8 h-8 object-contain" />
           <div>
             <span className="font-serif font-bold text-base tracking-widest text-[#1b1c1c]">KIKI</span>
             <span className="text-[10px] uppercase tracking-wider text-[#7a5646] block -mt-1 font-bold">Admin Portal</span>
@@ -172,9 +169,7 @@ export function AdminLayout() {
       {/* Mobile Top Header */}
       <header className="md:hidden flex h-16 items-center justify-between px-4 border-b border-[#d4c3bc]/50 bg-card">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#7a5646] flex items-center justify-center text-white">
-            <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-          </div>
+          <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-7 h-7 object-contain" />
           <span className="font-serif font-bold text-base text-[#1b1c1c]">KIKI Admin</span>
         </div>
 
