@@ -270,13 +270,16 @@ export function ServicesPage() {
         note: bookingNote ? `${bookingNote} (Tel: ${customerPhone})` : `(Tel: ${customerPhone})`,
       });
 
-      // Send confirmation to LINE chat
-      await sendBookingChatMessage(
-        selectedServices.map((s) => s.name).join(' + '),
-        selectedDate,
-        selectedTime,
-        totalPrice
-      );
+      // Send rich confirmation Flex Message to LINE chat
+      await sendBookingChatMessage({
+        serviceNames: selectedServices.map((s) => s.name).join(' + '),
+        date: selectedDate,
+        time: selectedTime,
+        branchName: selectedBranch?.name || 'KIKI Beauty Space',
+        stylistName: selectedStylist?.name || (language === 'th' ? 'ช่างคนไหนก็ได้' : 'First Available'),
+        totalPrice,
+        depositAmount: depositRequired ? depositAmount : 0,
+      });
 
       setShowSuccessModal(true);
     } catch (err) {

@@ -193,7 +193,7 @@ export function Home() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
           <a
-            href="https://page.line.me/338ismxn"
+            href="https://shop.line.me/@kikibeautyspace"
             target="_blank"
             rel="noopener noreferrer"
             className="p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-medium flex items-center justify-center gap-1.5 hover:bg-emerald-100 transition-colors"
@@ -201,7 +201,7 @@ export function Home() {
             <span>LINE Shopping</span>
           </a>
           <a
-            href="https://www.lazada.co.th/tag/kiki-beauty-space/"
+            href="https://www.lazada.co.th/shop/kiki-beauty-space/"
             target="_blank"
             rel="noopener noreferrer"
             className="p-3 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200/60 font-medium flex items-center justify-center gap-1.5 hover:bg-indigo-100 transition-colors"
