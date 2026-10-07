@@ -30,10 +30,13 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-const THAI_DAY_NAMES = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 const THAI_FULL_DAY_NAMES = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
-const THAI_MONTH_NAMES = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 const THAI_FULL_MONTH_NAMES = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+const ENGLISH_MONTH_NAMES = [
+  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+];
+const WEEKDAY_SHORT_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 function formatDateToYMD(d: Date): string {
   const year = d.getFullYear();
@@ -85,36 +88,66 @@ export function ServicesPage() {
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
 
   // Step 2: Date, Time & Stylist Selection
-  const [dateStartIndex, setDateStartIndex] = useState(0);
+  const [viewMonth, setViewMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => {
     return formatDateToYMD(new Date());
   });
   const [selectedTime, setSelectedTime] = useState<string>('13:00');
   const [selectedStylistId, setSelectedStylistId] = useState<string>('any'); // 'any' or stylist.id
 
-  // Generate 14 upcoming days
-  const availableDates = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + dateStartIndex + i);
-    const dateString = formatDateToYMD(d);
-    
-    const today = new Date();
-    const isToday = d.toDateString() === today.toDateString();
-    
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    const isTomorrow = d.toDateString() === tomorrow.toDateString();
+  // Month Calendar Calculations & Restrictions
+  const currentYear = viewMonth.getFullYear();
+  const currentMonthIndex = viewMonth.getMonth();
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const todayStr = formatDateToYMD(today);
 
-    return {
-      date: d,
-      dateString,
-      dayNumber: d.getDate(),
-      dayName: THAI_DAY_NAMES[d.getDay()],
-      monthName: THAI_MONTH_NAMES[d.getMonth()],
+  // Disable previous month button if we are at the current month/year
+  const isPrevMonthDisabled =
+    currentYear < today.getFullYear() ||
+    (currentYear === today.getFullYear() && currentMonthIndex <= today.getMonth());
+
+  const handlePrevMonth = () => {
+    if (isPrevMonthDisabled) return;
+    setViewMonth(new Date(currentYear, currentMonthIndex - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setViewMonth(new Date(currentYear, currentMonthIndex + 1, 1));
+  };
+
+  const handleSelectDate = (dateStr: string) => {
+    setSelectedDate(dateStr);
+    const [y, m] = dateStr.split('-').map(Number);
+    if (viewMonth.getFullYear() !== y || viewMonth.getMonth() !== m - 1) {
+      setViewMonth(new Date(y, m - 1, 1));
+    }
+  };
+
+  const firstDayOfWeek = new Date(currentYear, currentMonthIndex, 1).getDay(); // 0 = Sunday
+  const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+
+  const monthCells = [];
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    monthCells.push({ key: `blank-${i}`, isBlank: true });
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const cellDate = new Date(currentYear, currentMonthIndex, day);
+    const cellDateStr = formatDateToYMD(cellDate);
+    const isPast = cellDate < todayStart;
+    const isSelected = cellDateStr === selectedDate;
+    const isToday = cellDateStr === todayStr;
+
+    monthCells.push({
+      key: `day-${day}`,
+      isBlank: false,
+      day,
+      dateStr: cellDateStr,
+      isPast,
+      isSelected,
       isToday,
-      isTomorrow,
-    };
-  });
+    });
+  }
 
   // Step 3: Summary, Contact & Deposit Slip
   const [customerPhone, setCustomerPhone] = useState(user?.phone || '081-234-5678');
@@ -424,120 +457,92 @@ export function ServicesPage() {
       {/* ================= STEP 2: DATE, TIME & STYLIST SELECTION ================= */}
       {currentStep === 2 && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* 1. Date Selector (Visual Day Cards Display) */}
-          <div className="bg-[#fcf9f8] p-4 sm:p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[#1b1c1c] flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-[#7a5646]" />
-                  <span>เลือกวันที่นัดหมาย (Select Date)</span>
-                </h3>
-                <p className="text-xs text-[#636260] mt-0.5">
-                  กดเลือกวันที่ต้องการเข้ารับบริการได้ทันที
-                </p>
+          {/* 1. Date Selector (Full Month Calendar Grid with Small Circles) */}
+          <div className="bg-[#fcf9f8] p-5 sm:p-6 rounded-2xl border border-[#d4c3bc]/60 shadow-sm space-y-4">
+            {/* Header: Month Year and Navigation Buttons */}
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center gap-2">
+                <span className="font-serif font-bold text-sm sm:text-base uppercase tracking-wider text-[#1b1c1c]">
+                  {ENGLISH_MONTH_NAMES[currentMonthIndex]} {currentYear}
+                </span>
+                <span className="text-xs text-[#7a5646] font-medium hidden sm:inline">
+                  ({THAI_FULL_MONTH_NAMES[currentMonthIndex]} {currentYear + 543})
+                </span>
               </div>
 
-              {/* Navigation controls & custom date picker */}
-              <div className="flex items-center gap-1.5 self-end sm:self-auto">
-                <Button
-                  variant="outline"
-                  size="sm"
+              <div className="flex items-center gap-1.5">
+                <button
                   type="button"
-                  disabled={dateStartIndex === 0}
-                  onClick={() => setDateStartIndex((prev) => Math.max(0, prev - 7))}
-                  className="h-8 px-2 text-xs border-[#d4c3bc]/60 rounded-lg text-[#636260] hover:text-[#1b1c1c]"
-                  title="7 วันก่อนหน้า"
+                  disabled={isPrevMonthDisabled}
+                  onClick={handlePrevMonth}
+                  className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                    isPrevMonthDisabled
+                      ? 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed'
+                      : 'bg-[#e8ded8] hover:bg-[#d8cac2] text-[#636260] cursor-pointer'
+                  }`}
+                  title="เดือนก่อนหน้า"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
+                </button>
+                <button
                   type="button"
-                  onClick={() => setDateStartIndex((prev) => prev + 7)}
-                  className="h-8 px-2 text-xs border-[#d4c3bc]/60 rounded-lg text-[#636260] hover:text-[#1b1c1c]"
-                  title="7 วันถัดไป"
+                  onClick={handleNextMonth}
+                  className="w-7 h-7 rounded-full bg-[#e8ded8] hover:bg-[#d8cac2] text-[#636260] flex items-center justify-center transition-colors cursor-pointer"
+                  title="เดือนถัดไป"
                 >
                   <ChevronRight className="w-4 h-4" />
-                </Button>
-
-                {/* Optional Custom Date Picker input styled as a button */}
-                <label className="relative inline-flex items-center justify-center h-8 px-2.5 bg-card border border-[#d4c3bc]/60 hover:bg-[#e8ded8] rounded-lg text-xs text-[#7a5646] font-medium cursor-pointer transition-colors shadow-xs">
-                  <CalendarIcon className="w-3.5 h-3.5 mr-1" />
-                  <span>เลือกวันอื่น</span>
-                  <input
-                    type="date"
-                    min={formatDateToYMD(new Date())}
-                    value={selectedDate}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setSelectedDate(e.target.value);
-                      }
-                    }}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                </label>
+                </button>
               </div>
             </div>
 
-            {/* Visual Day Cards Grid */}
-            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-              {availableDates.map((item) => {
-                const isSelected = selectedDate === item.dateString;
+            {/* Weekday Headers: S M T W T F S */}
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {WEEKDAY_SHORT_HEADERS.map((w, idx) => (
+                <div key={idx} className="text-[11px] sm:text-xs font-semibold text-[#8a8885] py-1">
+                  {w}
+                </div>
+              ))}
+            </div>
+
+            {/* Month Days Grid */}
+            <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center">
+              {monthCells.map((cell) => {
+                if (cell.isBlank) {
+                  return <div key={cell.key} className="h-8 sm:h-9" />;
+                }
+
+                if (cell.isPast) {
+                  return (
+                    <div
+                      key={cell.key}
+                      className="w-8 h-8 sm:w-9 sm:h-9 mx-auto flex items-center justify-center text-xs sm:text-sm text-[#b8b3b0]/50 font-normal cursor-not-allowed select-none"
+                    >
+                      {cell.day}
+                    </div>
+                  );
+                }
+
                 return (
                   <button
-                    key={item.dateString}
+                    key={cell.key}
                     type="button"
-                    onClick={() => setSelectedDate(item.dateString)}
-                    className={`p-2 sm:p-2.5 rounded-xl border flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 relative group select-none ${
-                      isSelected
-                        ? 'bg-[#7a5646] text-white border-[#7a5646] shadow-md ring-2 ring-[#7a5646]/30 scale-[1.02]'
-                        : 'bg-card border-[#d4c3bc]/60 hover:bg-[#e8ded8] hover:border-[#7a5646]/40 text-[#1b1c1c]'
+                    onClick={() => handleSelectDate(cell.dateStr!)}
+                    className={`w-8 h-8 sm:w-9 sm:h-9 mx-auto rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-all select-none cursor-pointer ${
+                      cell.isSelected
+                        ? 'bg-[#7a5646] text-white font-bold shadow-md ring-2 ring-[#7a5646]/30 scale-105'
+                        : cell.isToday
+                        ? 'text-[#7a5646] font-bold border border-[#7a5646]/50 hover:bg-[#e8ded8]'
+                        : 'text-[#1b1c1c] hover:bg-[#ebdcd4]'
                     }`}
                   >
-                    {/* Badge Today / Tomorrow */}
-                    {item.isToday && (
-                      <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full mb-0.5 ${
-                        isSelected ? 'bg-amber-300 text-amber-950' : 'bg-amber-100 text-amber-900 border border-amber-200'
-                      }`}>
-                        วันนี้
-                      </span>
-                    )}
-                    {item.isTomorrow && (
-                      <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded-full mb-0.5 ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-[#7a5646]/10 text-[#7a5646]'
-                      }`}>
-                        พรุ่งนี้
-                      </span>
-                    )}
-                    {!item.isToday && !item.isTomorrow && (
-                      <span className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
-                        {item.monthName}
-                      </span>
-                    )}
-
-                    <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-[#636260]'}`}>
-                      {item.dayName}
-                    </span>
-
-                    <span className={`text-lg sm:text-xl font-bold font-serif my-0.5 ${
-                      isSelected ? 'text-white' : 'text-[#1b1c1c]'
-                    }`}>
-                      {item.dayNumber}
-                    </span>
-
-                    {(item.isToday || item.isTomorrow) && (
-                      <span className={`text-[9px] ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
-                        {item.monthName}
-                      </span>
-                    )}
+                    {cell.day}
                   </button>
                 );
               })}
             </div>
 
             {/* Selected Date Summary Display */}
-            <div className="p-2.5 bg-[#f5f0ea] rounded-xl flex items-center justify-between text-xs border border-[#d4c3bc]/50 text-[#1b1c1c]">
+            <div className="p-2.5 bg-[#f5f0ea] rounded-xl flex items-center justify-between text-xs border border-[#d4c3bc]/50 text-[#1b1c1c] mt-2">
               <div className="flex items-center gap-2">
                 <span className="text-[#636260]">วันที่เลือก:</span>
                 <span className="font-bold text-[#7a5646]">
