@@ -223,7 +223,7 @@ export function Home() {
       </div>
 
       {/* Salon Locations & Direct Hotline Card */}
-      <Card className="bg-[#fcf9f8] border-[#d4c3bc]/60 p-5 rounded-3xl shadow-sm">
+      {/* <Card className="bg-[#fcf9f8] border-[#d4c3bc]/60 p-5 rounded-3xl shadow-sm">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-full bg-[#7a5646]/10 text-[#7a5646] flex items-center justify-center flex-shrink-0 mt-0.5">
             <MapPin className="w-5 h-5" />
@@ -241,7 +241,7 @@ export function Home() {
             </div>
           </div>
         </div>
-      </Card>
+      </Card> */}
     </div>
   );
 }
