@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Scissors, ChevronRight, Clock, Sparkles, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { KikiLogo } from '@/components/common/kiki-logo';
 
 export function Home() {
   const { user } = useAuthStore();
@@ -180,11 +181,7 @@ export function Home() {
             <span className="text-[10px] uppercase tracking-widest text-[#7a5646] font-bold">KIKI Online Channels</span>
             <h4 className="font-serif font-bold text-base text-[#1b1c1c]">ร้านค้าออนไลน์ & ช่องทางติดตามทางการ</h4>
           </div>
-          <img 
-            src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" 
-            alt="KIKI Icon" 
-            className="w-6 h-6 object-contain"
-          />
+          <KikiLogo className="w-7 h-7 text-[#1b1c1c]" />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">

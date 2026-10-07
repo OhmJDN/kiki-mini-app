@@ -15,6 +15,7 @@ import {
   Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { KikiLogo } from '@/components/common/kiki-logo';
 
 export function AdminLayout() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -107,7 +108,7 @@ export function AdminLayout() {
       <aside className="hidden md:flex flex-col w-64 border-r border-[#d4c3bc]/60 bg-card">
         {/* Brand */}
         <div className="h-16 flex items-center px-6 border-b border-[#d4c3bc]/50 gap-2.5">
-          <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-9 h-9 rounded-full object-cover shadow-sm" />
+          <KikiLogo className="w-9 h-9 text-[#1b1c1c] shrink-0" />
           <div>
             <span className="font-serif font-bold text-base tracking-widest text-[#1b1c1c]">KIKI</span>
             <span className="text-[10px] uppercase tracking-wider text-[#7a5646] block -mt-1 font-bold">Admin Portal</span>
@@ -169,7 +170,7 @@ export function AdminLayout() {
       {/* Mobile Top Header */}
       <header className="md:hidden flex h-16 items-center justify-between px-4 border-b border-[#d4c3bc]/50 bg-card">
         <div className="flex items-center gap-2">
-          <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-8 h-8 rounded-full object-cover shadow-sm" />
+          <KikiLogo className="w-8 h-8 text-[#1b1c1c] shrink-0" />
           <span className="font-serif font-bold text-base text-[#1b1c1c]">KIKI Admin</span>
         </div>
 

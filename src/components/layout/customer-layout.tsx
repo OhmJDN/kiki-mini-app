@@ -13,6 +13,7 @@ import {
   LogIn
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { KikiLogo } from '@/components/common/kiki-logo';
 
 export function CustomerLayout() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -48,11 +49,7 @@ export function CustomerLayout() {
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <img 
-              src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" 
-              alt="KIKI Beauty Space Logo" 
-              className="w-10 h-10 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform"
-            />
+            <KikiLogo className="w-10 h-10 text-[#1b1c1c] group-hover:scale-105 transition-transform shrink-0" />
             <div>
               <span className="font-serif font-bold text-lg tracking-widest text-[#1b1c1c] block leading-none">KIKI</span>
               <span className="text-[9px] uppercase tracking-widest text-[#7a5646] font-semibold">BEAUTY SPACE</span>
