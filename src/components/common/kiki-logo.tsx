@@ -8,7 +8,7 @@ interface KikiLogoProps extends React.SVGProps<SVGSVGElement> {
 export function KikiLogo({ className = 'w-9 h-9', size, ...props }: KikiLogoProps) {
   return (
     <svg
-      viewBox="0 0 100 100"
+      viewBox="22 22 56 56"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
