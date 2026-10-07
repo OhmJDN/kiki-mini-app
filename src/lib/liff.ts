@@ -1,6 +1,6 @@
 import liff from '@line/liff';
 
-const LIFF_ID_FALLBACK = '2011817864-sqDKjChb';
+const LIFF_ID_FALLBACK = '2011914730-8NETyoXW';
 const rawLiffId = import.meta.env.VITE_LIFF_ID;
 const liffId = (rawLiffId && rawLiffId !== 'your_liff_id_here' && !rawLiffId.includes('YOUR_LIFF')) 
   ? rawLiffId 

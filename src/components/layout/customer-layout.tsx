@@ -48,11 +48,11 @@ export function CustomerLayout() {
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-full bg-[#1b1c1c] flex items-center justify-center p-1.5 shadow-sm border border-[#d4c3bc]/60">
+            <div className="w-10 h-10 rounded-full bg-[#1b1c1c] flex items-center justify-center overflow-hidden shadow-sm border border-[#d4c3bc]/60 group-hover:scale-105 transition-transform">
               <img 
                 src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" 
                 alt="KIKI Beauty Space Logo" 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
             <div>

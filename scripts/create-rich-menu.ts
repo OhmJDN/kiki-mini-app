@@ -5,9 +5,9 @@ import * as path from 'path';
 // ใส่ Channel Access Token ของคุณที่นี่
 const CHANNEL_ACCESS_TOKEN = 'YOUR_CHANNEL_ACCESS_TOKEN';
 
-// ใส่ LIFF URL ของคุณ
-const LIFF_URL_SERVICES = 'https://liff.line.me/2011817864-sqDKjChb/home/services';
-const LIFF_URL_BOOKING = 'https://liff.line.me/2011817864-sqDKjChb/home/bookings';
+// ใส่ LIFF URL ของคุณ (ใช้ Developing หรือ Published URL)
+const LIFF_URL_SERVICES = 'https://miniapp.line.me/2011914730-8NETyoXW/services';
+const LIFF_URL_BOOKING = 'https://miniapp.line.me/2011914730-8NETyoXW/bookings';
 
 async function createRichMenu() {
   // 1. Create Rich Menu definition
