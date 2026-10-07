@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLanguageStore } from '@/stores/language-store';
 import { salonService } from '@/services/salon-service';
-import type { Service, BookingWithRelations } from '@/types';
+import type { Service, BookingWithRelations, Branch } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Scissors, ChevronRight, Clock, Sparkles, MapPin } from 'lucide-react';
+import { Calendar, Scissors, ChevronRight, Clock, Sparkles, MapPin, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { KikiLogo } from '@/components/common/kiki-logo';
 
@@ -14,6 +14,7 @@ export function Home() {
   const { user } = useAuthStore();
   const { t, language } = useLanguageStore();
   const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [upcomingBooking, setUpcomingBooking] = useState<BookingWithRelations | null>(null);
 
   useEffect(() => {
@@ -21,8 +22,12 @@ export function Home() {
   }, [user?.id]);
 
   const loadHomeData = async () => {
-    const services = await salonService.getServices();
+    const [services, branchList] = await Promise.all([
+      salonService.getServices(),
+      salonService.getBranches(),
+    ]);
     setFeaturedServices(services.slice(0, 4));
+    setBranches(branchList.filter((b) => b.is_active));
 
     if (user) {
       const bookings = await salonService.getBookings({ customerId: user.id });
@@ -223,25 +228,84 @@ export function Home() {
       </div>
 
       {/* Salon Locations & Direct Hotline Card */}
-      {/* <Card className="bg-[#fcf9f8] border-[#d4c3bc]/60 p-5 rounded-3xl shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full bg-[#7a5646]/10 text-[#7a5646] flex items-center justify-center flex-shrink-0 mt-0.5">
-            <MapPin className="w-5 h-5" />
-          </div>
-          <div className="text-xs text-[#636260] space-y-1.5 flex-1">
-            <h4 className="font-semibold text-sm text-[#1b1c1c]">{t('branchesTitle')}</h4>
-            <p><strong>Flagship:</strong> {language === 'th' ? 'สุขุมวิท 39 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ' : 'Sukhumvit 39, Khlong Tan Nuea, Watthana, Bangkok'}</p>
-            <p><strong>Siam Lounge:</strong> {language === 'th' ? 'ชั้น 2 สยามพารากอน' : '2nd Fl. Siam Paragon'} | <strong>Bangna:</strong> Megabangna</p>
-            <div className="pt-1 flex flex-wrap items-center gap-3 text-[#7a5646] font-semibold">
-              <a href="tel:0964415955" className="hover:underline">📞 096-441-5955</a>
-              <span>•</span>
-              <a href="tel:0917985955" className="hover:underline">📞 091-798-5955</a>
-              <span>•</span>
-              <a href="https://lin.ee/gLMafQm" target="_blank" rel="noopener noreferrer" className="hover:underline">LINE: @kikibeautyspace</a>
+      <Card className="bg-[#fcf9f8] border-[#d4c3bc]/60 p-5 rounded-3xl shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-1 border-b border-[#d4c3bc]/40">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-[#7a5646]/10 text-[#7a5646] flex items-center justify-center flex-shrink-0">
+              <MapPin className="w-4 h-4" />
             </div>
+            <h4 className="font-serif font-bold text-base text-[#1b1c1c]">{t('branchesTitle')}</h4>
           </div>
+          <span className="text-[11px] text-[#7a5646] font-medium bg-[#7a5646]/10 px-2.5 py-0.5 rounded-full">
+            {branches.length} {language === 'th' ? 'สาขา' : 'Locations'}
+          </span>
         </div>
-      </Card> */}
+
+        {/* Dynamic Branch List */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {branches.map((b) => (
+            <div
+              key={b.id}
+              className="p-3.5 rounded-2xl bg-card border border-[#d4c3bc]/60 flex flex-col justify-between space-y-2.5 hover:border-[#7a5646]/50 transition-colors shadow-xs"
+            >
+              <div>
+                <h5 className="font-semibold text-xs sm:text-sm text-[#1b1c1c] leading-tight">
+                  {b.name}
+                </h5>
+                <p className="text-[11px] text-[#636260] mt-1 line-clamp-2 leading-relaxed">
+                  {b.address}
+                </p>
+                {b.opening_hours && (
+                  <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#7a5646]" />
+                    <span>{b.opening_hours}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-[#d4c3bc]/30 flex items-center justify-between text-xs">
+                {b.phone ? (
+                  <a
+                    href={`tel:${b.phone.replace(/[^0-9]/g, '')}`}
+                    className="inline-flex items-center gap-1 text-[#7a5646] font-semibold hover:underline text-[11px]"
+                  >
+                    <Phone className="w-3 h-3" />
+                    <span>{b.phone}</span>
+                  </a>
+                ) : (
+                  <span />
+                )}
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="text-[11px] text-[#7a5646] hover:bg-[#7a5646]/10 p-1 h-auto font-medium"
+                >
+                  <Link to="/services">
+                    {language === 'th' ? 'จองสาขานี้ →' : 'Book →'}
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Contact Hotline & LINE Official */}
+        <div className="pt-2 border-t border-[#d4c3bc]/40 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-[#636260]">
+            <span className="font-medium text-[#1b1c1c]">{language === 'th' ? 'ฝ่ายบริการลูกค้า:' : 'Customer Care:'}</span>
+            <a href="tel:0964415955" className="text-[#7a5646] font-semibold hover:underline">096-441-5955</a>
+          </div>
+          <a
+            href="https://lin.ee/gLMafQm"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#06C755] font-semibold hover:underline flex items-center gap-1"
+          >
+            <span>LINE Official: @kikibeautyspace</span>
+          </a>
+        </div>
+      </Card>
     </div>
   );
 }
