@@ -45,6 +45,32 @@ export const isInLiffBrowser = (): boolean => {
   }
 };
 
+export const getLiffLanguage = (): string => {
+  try {
+    if (typeof liff !== 'undefined' && typeof liff.getLanguage === 'function') {
+      const lang = liff.getLanguage();
+      if (lang) return lang;
+    }
+  } catch (e) {
+    console.warn('Failed to get LIFF language:', e);
+  }
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return navigator.language;
+  }
+  return 'th';
+};
+
+export const getLiffContext = () => {
+  try {
+    if (typeof liff !== 'undefined' && typeof liff.getContext === 'function') {
+      return liff.getContext();
+    }
+  } catch (e) {
+    console.warn('Failed to get LIFF context:', e);
+  }
+  return null;
+};
+
 export const getLiffProfile = async () => {
   await initializeLiff();
   try {

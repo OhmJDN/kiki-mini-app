@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { salonService } from '@/services/salon-service';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLanguageStore } from '@/stores/language-store';
 import { authenticateWithLine } from '@/features/auth/auth-service';
 import type { BookingWithRelations } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const TIME_SLOTS = ['10:00', '11:30', '13:00', '14:30', '16:00', '17:30', '18:30
 
 export function BookingsPage() {
   const { user } = useAuthStore();
+  const { t, language } = useLanguageStore();
   const [bookings, setBookings] = useState<BookingWithRelations[]>([]);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +76,7 @@ export function BookingsPage() {
   };
 
   const handleCancelBooking = async (bookingId: string) => {
-    if (!window.confirm('คุณต้องการยกเลิกการจองคิวนี้ใช่หรือไม่?')) return;
+    if (!window.confirm(t('cancelConfirmPrompt'))) return;
 
     setCancellingId(bookingId);
     try {
@@ -82,7 +84,7 @@ export function BookingsPage() {
       await loadBookings();
     } catch (err) {
       console.error('Cancel booking failed:', err);
-      alert('ไม่สามารถยกเลิกการจองได้ โปรดติดต่อแอดมิน');
+      alert(language === 'th' ? 'ไม่สามารถยกเลิกการจองได้ โปรดติดต่อแอดมิน' : 'Failed to cancel booking. Please contact staff.');
     } finally {
       setCancellingId(null);
     }
@@ -97,10 +99,10 @@ export function BookingsPage() {
       await salonService.rescheduleBooking(reschedulingBooking.id, newDate, newTime);
       setReschedulingBooking(null);
       await loadBookings();
-      alert('เลื่อนเวลานัดหมายเรียบร้อยแล้ว แอดมินจะทำการยืนยันคิวใหม่ให้โดยเร็วครับ');
+      alert(t('rescheduleSuccess'));
     } catch (err) {
       console.error('Reschedule failed:', err);
-      alert('เกิดข้อผิดพลาดในการเลื่อนนัด');
+      alert(language === 'th' ? 'เกิดข้อผิดพลาดในการเลื่อนนัด' : 'Failed to reschedule appointment.');
     } finally {
       setIsSubmittingReschedule(false);
     }
@@ -126,34 +128,34 @@ export function BookingsPage() {
         {status === 'pending' && (
           <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-300 gap-1 text-[10px]">
             <Clock className="w-3 h-3" />
-            รอยืนยันคิว
+            {t('statusPending')}
           </Badge>
         )}
         {status === 'confirmed' && (
           <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-300 gap-1 text-[10px]">
             <CheckCircle2 className="w-3 h-3" />
-            ยืนยันคิวแล้ว
+            {t('statusConfirmed')}
           </Badge>
         )}
         {status === 'completed' && (
           <Badge className="bg-blue-100 text-blue-800 border-blue-300 text-[10px]">
-            รับบริการแล้ว
+            {t('statusCompleted')}
           </Badge>
         )}
         {status === 'cancelled' && (
           <Badge className="bg-rose-100 text-rose-800 border-rose-300 text-[10px]">
-            ยกเลิกแล้ว
+            {t('statusCancelled')}
           </Badge>
         )}
 
         {depositStatus === 'pending_verification' && (
           <Badge variant="outline" className="border-amber-400 text-amber-800 text-[9px]">
-            สลิปรอตรวจสอบ
+            {t('depositStatusPending')}
           </Badge>
         )}
         {depositStatus === 'verified' && (
           <Badge variant="outline" className="border-emerald-500 text-emerald-800 text-[9px]">
-            มัดจำแล้ว
+            {t('depositStatusVerified')}
           </Badge>
         )}
       </div>
@@ -165,16 +167,16 @@ export function BookingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-[#1b1c1c]">การจองของฉัน (My Bookings)</h1>
+          <h1 className="font-serif text-3xl font-bold text-[#1b1c1c]">{t('myBookingsTitle')}</h1>
           <p className="text-sm text-[#636260] mt-1">
-            ตรวจสอบนัดหมาย เลื่อนวันเวลา หรือขอยกเลิกการจอง
+            {t('myBookingsSubtitle')}
           </p>
         </div>
 
         <Button asChild className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full px-5 shadow-sm">
-          <Link to="/home/services">
+          <Link to="/services">
             <PlusCircle className="w-4 h-4 mr-2" />
-            จองบริการเพิ่ม
+            {t('bookMoreBtn')}
           </Link>
         </Button>
       </div>
@@ -189,7 +191,7 @@ export function BookingsPage() {
               : 'border-transparent text-[#636260] hover:text-[#1b1c1c]'
           }`}
         >
-          <span>นัดหมายที่กำลังจะมาถึง</span>
+          <span>{t('tabUpcoming')}</span>
           <span className="w-5 h-5 rounded-full bg-[#7a5646]/10 text-xs flex items-center justify-center font-bold">
             {upcomingBookings.length}
           </span>
@@ -203,7 +205,7 @@ export function BookingsPage() {
               : 'border-transparent text-[#636260] hover:text-[#1b1c1c]'
           }`}
         >
-          <span>ประวัติการจอง</span>
+          <span>{t('tabPast')}</span>
           <span className="w-5 h-5 rounded-full bg-muted text-xs flex items-center justify-center font-bold text-muted-foreground">
             {pastBookings.length}
           </span>
@@ -221,16 +223,13 @@ export function BookingsPage() {
         <div className="text-center py-16 bg-card rounded-2xl border border-dashed border-[#d4c3bc] p-8 space-y-4">
           <CalendarIcon className="w-12 h-12 mx-auto text-[#7a5646]/40" />
           <div>
-            <h3 className="font-semibold text-[#1b1c1c]">ไม่มีรายการนัดหมายในหน้านี้</h3>
-            <p className="text-xs text-[#636260] mt-1">
-              {activeTab === 'upcoming'
-                ? 'คุณยังไม่มีนัดหมายที่กำลังจะมาถึง สามารถเลือกจองบริการได้เลย'
-                : 'ยังไม่มีประวัติการจองก่อนหน้า'}
-            </p>
+            <h3 className="font-semibold text-[#1b1c1c]">
+              {activeTab === 'upcoming' ? t('noUpcomingBookings') : t('noPastBookings')}
+            </h3>
           </div>
           {activeTab === 'upcoming' && (
             <Button asChild className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full">
-              <Link to="/home/services">ดูเมนูบริการ</Link>
+              <Link to="/services">{t('viewServicesButton')}</Link>
             </Button>
           )}
         </div>
@@ -253,10 +252,10 @@ export function BookingsPage() {
                       </div>
                       <div>
                         <h3 className="font-serif font-bold text-base sm:text-lg text-[#1b1c1c]">
-                          {serviceNames || 'บริการ KIKI Beauty Space'}
+                          {serviceNames || 'KIKI Beauty Space Service'}
                         </h3>
                         <p className="text-xs text-[#636260]">
-                          รวม {booking.total_duration_minutes || booking.service?.duration_minutes || 60} นาที • ฿{(booking.total_price || booking.service?.price || 0).toLocaleString()}
+                          {t('totalDuration')} {booking.total_duration_minutes || booking.service?.duration_minutes || 60} {t('minutes')} • ฿{(booking.total_price || booking.service?.price || 0).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -269,26 +268,26 @@ export function BookingsPage() {
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4 text-[#7a5646]" />
                       <span>
-                        วัน-เวลา: <strong className="text-[#1b1c1c]">{booking.booking_date} เวลา {booking.booking_time} น.</strong>
+                        {t('appointmentDate')}: <strong className="text-[#1b1c1c]">{booking.booking_date} {booking.booking_time} {t('minsShort')}</strong>
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-[#7a5646]" />
                       <span>
-                        ช่างผู้ให้บริการ: <strong className="text-[#1b1c1c]">{booking.stylist?.name || 'ช่างคนไหนก็ได้ (First Available)'}</strong>
+                        {t('stylist')}: <strong className="text-[#1b1c1c]">{booking.stylist?.name || t('anyStylist')}</strong>
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-[#7a5646]" />
-                      <span>สาขา: <strong className="text-[#1b1c1c]">{booking.branch?.name || 'สุขุมวิท 39 (Flagship)'}</strong></span>
+                      <span>{t('branch')}: <strong className="text-[#1b1c1c]">{booking.branch?.name || 'สุขุมวิท 39 (Flagship)'}</strong></span>
                     </div>
 
                     {booking.deposit_amount > 0 && (
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-[#7a5646]" />
-                        <span>ยอดมัดจำ: <strong className="text-amber-800">฿{booking.deposit_amount.toLocaleString()}</strong> ({booking.deposit_status === 'verified' ? 'ยืนยันแล้ว' : 'รอยืนยันสลิป'})</span>
+                        <span>{t('depositRequired')}: <strong className="text-amber-800">฿{booking.deposit_amount.toLocaleString()}</strong> ({booking.deposit_status === 'verified' ? t('depositStatusVerified') : t('depositStatusPending')})</span>
                       </div>
                     )}
 
@@ -303,7 +302,7 @@ export function BookingsPage() {
                   {/* Footer Actions */}
                   <div className="pt-2 flex items-center justify-between border-t border-[#d4c3bc]/40">
                     <span className="text-[11px] text-muted-foreground">
-                      รหัสการจอง: {booking.id}
+                      {t('bookingIdLabel')} {booking.id}
                     </span>
 
                     <div className="flex items-center gap-2">
@@ -320,7 +319,7 @@ export function BookingsPage() {
                             className="text-xs text-[#7a5646] border-[#7a5646]/40 hover:bg-[#7a5646]/10 rounded-full h-8 px-3"
                           >
                             <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                            เลื่อนนัดหมาย
+                            {t('rescheduleBooking')}
                           </Button>
 
                           <Button
@@ -330,7 +329,7 @@ export function BookingsPage() {
                             onClick={() => handleCancelBooking(booking.id)}
                             className="text-xs text-rose-600 border-rose-300 hover:bg-rose-50 rounded-full h-8 px-3"
                           >
-                            {cancellingId === booking.id ? 'กำลังยกเลิก...' : 'ยกเลิก'}
+                            {cancellingId === booking.id ? (language === 'th' ? 'กำลังยกเลิก...' : 'Cancelling...') : t('cancelBooking')}
                           </Button>
                         </>
                       )}
@@ -342,8 +341,8 @@ export function BookingsPage() {
                           size="sm"
                           className="text-xs border-[#7a5646]/40 text-[#7a5646] hover:bg-[#7a5646]/10 rounded-full h-8"
                         >
-                          <Link to={`/home/services?book=${booking.service_id}`}>
-                            จองซ้ำ
+                          <Link to={`/services?book=${booking.service_id}`}>
+                            {t('rebookService')}
                           </Link>
                         </Button>
                       )}
@@ -361,7 +360,7 @@ export function BookingsPage() {
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#fcf9f8] w-full max-w-md rounded-3xl p-6 shadow-2xl border border-[#d4c3bc] space-y-4">
             <div className="flex items-center justify-between border-b border-[#d4c3bc]/50 pb-3">
-              <h3 className="font-serif text-lg font-bold text-[#1b1c1c]">เลื่อนเวลานัดหมาย (Reschedule)</h3>
+              <h3 className="font-serif text-lg font-bold text-[#1b1c1c]">{t('rescheduleModalTitle')}</h3>
               <button onClick={() => setReschedulingBooking(null)} className="p-1 rounded-full hover:bg-muted text-muted-foreground">
                 <X className="w-5 h-5" />
               </button>
@@ -369,12 +368,12 @@ export function BookingsPage() {
 
             <form onSubmit={handleRescheduleSubmit} className="space-y-4 text-xs">
               <div className="p-3 bg-[#f6f3f2] rounded-xl space-y-1">
-                <p><strong>บริการ:</strong> {reschedulingBooking.service?.name}</p>
-                <p><strong>เวลานัดเดิม:</strong> {reschedulingBooking.booking_date} เวลา {reschedulingBooking.booking_time} น.</p>
+                <p><strong>{t('serviceItems')}:</strong> {reschedulingBooking.service?.name}</p>
+                <p><strong>{t('appointmentDate')}:</strong> {reschedulingBooking.booking_date} {reschedulingBooking.booking_time} {t('minsShort')}</p>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#1b1c1c] mb-1">เลือกวันที่ใหม่ *</label>
+                <label className="block font-semibold text-[#1b1c1c] mb-1">{t('selectNewDate')}</label>
                 <Input
                   type="date"
                   value={newDate}
@@ -386,20 +385,20 @@ export function BookingsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#1b1c1c] mb-1">เลือกรอบเวลาใหม่ *</label>
+                <label className="block font-semibold text-[#1b1c1c] mb-1">{t('selectNewTime')}</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TIME_SLOTS.map((t) => (
+                  {TIME_SLOTS.map((tSlot) => (
                     <button
-                      key={t}
+                      key={tSlot}
                       type="button"
-                      onClick={() => setNewTime(t)}
+                      onClick={() => setNewTime(tSlot)}
                       className={`py-2 rounded-xl border text-xs font-medium transition-all ${
-                        newTime === t
+                        newTime === tSlot
                           ? 'bg-[#7a5646] text-white border-[#7a5646]'
                           : 'bg-card border-[#d4c3bc] hover:bg-[#e8ded8]'
                       }`}
                     >
-                      {t} น.
+                      {tSlot} {t('minsShort')}
                     </button>
                   ))}
                 </div>
@@ -411,7 +410,7 @@ export function BookingsPage() {
                   disabled={isSubmittingReschedule}
                   className="w-full bg-[#7a5646] hover:bg-[#634335] text-white py-5 rounded-xl font-medium"
                 >
-                  {isSubmittingReschedule ? 'กำลังบันทึก...' : `ยืนยันเลื่อนนัดเป็น ${newDate} เวลา ${newTime} น.`}
+                  {isSubmittingReschedule ? t('submitting') : `${t('confirmRescheduleBtn')}: ${newDate} (${newTime})`}
                 </Button>
               </div>
             </form>

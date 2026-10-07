@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLanguageStore } from '@/stores/language-store';
 import { salonService } from '@/services/salon-service';
 import type { Service, BookingWithRelations } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { KikiLogo } from '@/components/common/kiki-logo';
 
 export function Home() {
   const { user } = useAuthStore();
+  const { t, language } = useLanguageStore();
   const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
   const [upcomingBooking, setUpcomingBooking] = useState<BookingWithRelations | null>(null);
 
@@ -46,19 +48,19 @@ export function Home() {
         <div className="relative z-10 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-amber-200 text-xs font-semibold mb-3 border border-white/20">
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            No.1 Luxury Beauty Destination
+            {t('heroBadge')}
           </div>
 
           <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-2 tracking-wide leading-tight">
-            ยินดีต้อนรับ, <span className="text-amber-200">{user?.display_name || 'ลูกค้าคนพิเศษ'}</span>
+            {t('welcome')} <span className="text-amber-200">{user?.display_name || t('specialGuest')}</span>
           </h2>
           <p className="text-white/90 text-xs sm:text-sm mb-5 leading-relaxed font-light">
-            สัมผัสประสบการณ์ความงามระดับพรีเมียม ผสานไลฟ์สไตล์และแฟชั่น เพื่อการดูแลที่ตอบโจทย์เฉพาะคุณ
+            {t('heroSubtitle')}
           </p>
 
           <Button asChild className="bg-[#f5f0ea] hover:bg-white text-[#1b1c1c] font-semibold rounded-full px-6 shadow-lg text-xs h-10">
             <Link to="/services">
-              จองบริการทันที <ChevronRight className="ml-1 w-4 h-4" />
+              {t('bookNow')} <ChevronRight className="ml-1 w-4 h-4" />
             </Link>
           </Button>
         </div>
@@ -74,22 +76,22 @@ export function Home() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-amber-900 uppercase tracking-wide">นัดหมายถัดไปของคุณ</span>
+                  <span className="text-xs font-bold text-amber-900 uppercase tracking-wide">{t('upcomingAppointmentBadge')}</span>
                   <Badge className="bg-amber-200 text-amber-900 border-0 text-[10px]">
-                    {upcomingBooking.status === 'confirmed' ? 'ยืนยันคิวแล้ว' : 'รอการยืนยัน'}
+                    {upcomingBooking.status === 'confirmed' ? t('statusConfirmed') : t('statusPending')}
                   </Badge>
                 </div>
                 <h4 className="font-semibold text-sm text-[#1b1c1c] mt-0.5">
                   {upcomingBooking.service?.name}
                 </h4>
                 <p className="text-xs text-[#636260] mt-0.5">
-                  วันที่ <strong>{upcomingBooking.booking_date}</strong> เวลา <strong>{upcomingBooking.booking_time} น.</strong>
+                  {language === 'th' ? 'วันที่ ' : 'Date: '}<strong>{upcomingBooking.booking_date}</strong> {language === 'th' ? 'เวลา ' : 'Time: '}<strong>{upcomingBooking.booking_time} {t('minsShort')}</strong>
                 </p>
               </div>
             </div>
 
             <Button asChild variant="outline" size="sm" className="border-amber-400 text-amber-900 hover:bg-amber-100 rounded-full text-xs">
-              <Link to="/bookings">ดูรายละเอียดนัดหมาย</Link>
+              <Link to="/bookings">{t('viewBookingDetails')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -104,8 +106,8 @@ export function Home() {
                 <Scissors className="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-sm sm:text-base text-[#1b1c1c]">เมนูบริการของเรา</h3>
-                <p className="text-[11px] sm:text-xs text-[#636260] mt-0.5">ตัดผม ทำสี เล็บ สปา ต่อขนตา</p>
+                <h3 className="font-serif font-bold text-sm sm:text-base text-[#1b1c1c]">{t('ourServicesTitle')}</h3>
+                <p className="text-[11px] sm:text-xs text-[#636260] mt-0.5">{t('ourServicesSub')}</p>
               </div>
             </CardContent>
           </Card>
@@ -118,8 +120,8 @@ export function Home() {
                 <Calendar className="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-sm sm:text-base text-[#1b1c1c]">การจองของฉัน</h3>
-                <p className="text-[11px] sm:text-xs text-[#636260] mt-0.5">ตรวจสอบสถานะ & เลื่อนนัดหมาย</p>
+                <h3 className="font-serif font-bold text-sm sm:text-base text-[#1b1c1c]">{t('myBookingsCardTitle')}</h3>
+                <p className="text-[11px] sm:text-xs text-[#636260] mt-0.5">{t('myBookingsCardSub')}</p>
               </div>
             </CardContent>
           </Card>
@@ -130,11 +132,11 @@ export function Home() {
       <div>
         <div className="flex items-center justify-between mb-3.5">
           <div>
-            <h3 className="font-serif text-lg sm:text-xl font-bold text-[#1b1c1c]">บริการยอดนิยม (Signature Services)</h3>
-            <p className="text-xs text-[#636260]">บริการระดับมาสเตอร์ที่ลูกค้าประทับใจมากที่สุด</p>
+            <h3 className="font-serif text-lg sm:text-xl font-bold text-[#1b1c1c]">{t('featuredServicesTitle')}</h3>
+            <p className="text-xs text-[#636260]">{t('featuredServicesSub')}</p>
           </div>
           <Button variant="link" className="text-[#7a5646] p-0 h-auto text-xs sm:text-sm font-semibold" asChild>
-            <Link to="/services">ดูทั้งหมด →</Link>
+            <Link to="/services">{t('viewAllServices')}</Link>
           </Button>
         </div>
 
@@ -157,7 +159,7 @@ export function Home() {
                     <span>•</span>
                     <span className="flex items-center gap-1 text-[11px]">
                       <Clock className="w-3 h-3 text-muted-foreground" />
-                      {service.duration_minutes} น.
+                      {service.duration_minutes} {t('minutes')}
                     </span>
                   </div>
                 </div>
@@ -166,7 +168,7 @@ export function Home() {
                   size="sm"
                   className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full text-xs px-3.5 h-8 flex-shrink-0 shadow-sm"
                 >
-                  <Link to={`/services?book=${service.id}`}>จอง</Link>
+                  <Link to={`/services?book=${service.id}`}>{t('bookShort')}</Link>
                 </Button>
               </div>
             </Card>
@@ -179,7 +181,7 @@ export function Home() {
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] uppercase tracking-widest text-[#7a5646] font-bold">KIKI Online Channels</span>
-            <h4 className="font-serif font-bold text-base text-[#1b1c1c]">ร้านค้าออนไลน์ & ช่องทางติดตามทางการ</h4>
+            <h4 className="font-serif font-bold text-base text-[#1b1c1c]">{t('onlineChannelsTitle')}</h4>
           </div>
           <KikiLogo className="w-7 h-7 text-[#1b1c1c]" />
         </div>
@@ -227,9 +229,9 @@ export function Home() {
             <MapPin className="w-5 h-5" />
           </div>
           <div className="text-xs text-[#636260] space-y-1.5 flex-1">
-            <h4 className="font-semibold text-sm text-[#1b1c1c]">KIKI Beauty Space Branches</h4>
-            <p><strong>Flagship:</strong> สุขุมวิท 39 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ</p>
-            <p><strong>Siam Lounge:</strong> ชั้น 2 สยามพารากอน | <strong>Bangna:</strong> เมกาบางนา</p>
+            <h4 className="font-semibold text-sm text-[#1b1c1c]">{t('branchesTitle')}</h4>
+            <p><strong>Flagship:</strong> {language === 'th' ? 'สุขุมวิท 39 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ' : 'Sukhumvit 39, Khlong Tan Nuea, Watthana, Bangkok'}</p>
+            <p><strong>Siam Lounge:</strong> {language === 'th' ? 'ชั้น 2 สยามพารากอน' : '2nd Fl. Siam Paragon'} | <strong>Bangna:</strong> Megabangna</p>
             <div className="pt-1 flex flex-wrap items-center gap-3 text-[#7a5646] font-semibold">
               <a href="tel:0964415955" className="hover:underline">📞 096-441-5955</a>
               <span>•</span>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { salonService } from '@/services/salon-service';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLanguageStore } from '@/stores/language-store';
 import { loginAsDemo, authenticateWithLine } from '@/features/auth/auth-service';
 import { sendBookingChatMessage } from '@/lib/liff';
 import { uploadSlip } from '@/lib/slip-upload';
@@ -32,9 +33,10 @@ import {
 
 const THAI_FULL_DAY_NAMES = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
 const THAI_FULL_MONTH_NAMES = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+const ENGLISH_DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const ENGLISH_MONTH_NAMES = [
-  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ];
 const WEEKDAY_SHORT_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -45,24 +47,21 @@ function formatDateToYMD(d: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatThaiDateDisplay(dateStr: string): string {
+function formatLocalizedDateDisplay(dateStr: string, language: 'th' | 'en'): string {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-').map(Number);
   const dateObj = new Date(y, m - 1, d);
-  const dayName = THAI_FULL_DAY_NAMES[dateObj.getDay()];
-  const monthName = THAI_FULL_MONTH_NAMES[m - 1];
-  const thaiYear = y + 543;
-  return `${dayName}ที่ ${d} ${monthName} ${thaiYear}`;
+  if (language === 'en') {
+    const dayName = ENGLISH_DAY_NAMES[dateObj.getDay()];
+    const monthName = ENGLISH_MONTH_NAMES[m - 1];
+    return `${dayName}, ${monthName} ${d}, ${y}`;
+  } else {
+    const dayName = THAI_FULL_DAY_NAMES[dateObj.getDay()];
+    const monthName = THAI_FULL_MONTH_NAMES[m - 1];
+    const thaiYear = y + 543;
+    return `${dayName}ที่ ${d} ${monthName} ${thaiYear}`;
+  }
 }
-
-const CATEGORIES: { key: ServiceCategory | 'all'; label: string; icon: string }[] = [
-  { key: 'all', label: 'ทั้งหมด', icon: '✨' },
-  { key: 'hair', label: 'ทำผม & ทรีทเมนต์', icon: '💇‍♀️' },
-  { key: 'nails', label: 'ทำเล็บ & สปา', icon: '💅' },
-  { key: 'spa', label: 'สปา & ผ่อนคลาย', icon: '🌿' },
-  { key: 'makeup', label: 'แต่งหน้า', icon: '💄' },
-  { key: 'skincare', label: 'บำรุงผิวหน้า', icon: '🧖‍♀️' },
-];
 
 const MORNING_SLOTS = ['09:30', '10:30', '11:30'];
 const AFTERNOON_SLOTS = ['13:00', '14:30', '16:00', '17:30', '18:30', '19:30'];
@@ -71,6 +70,7 @@ export function ServicesPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
+  const { t, language } = useLanguageStore();
 
   // Wizard Step: 1 = Branch & Services (Multipicklist), 2 = Date & Stylist, 3 = Summary & Deposit
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -160,11 +160,11 @@ export function ServicesPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('กรุณาเลือกไฟล์รูปภาพ');
+      alert(language === 'th' ? 'กรุณาเลือกไฟล์รูปภาพ' : 'Please select an image file');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('ไฟล์ใหญ่เกิน 5MB');
+      alert(language === 'th' ? 'ไฟล์ใหญ่เกิน 5MB' : 'File size exceeds 5MB');
       return;
     }
     if (slipPreview) URL.revokeObjectURL(slipPreview);
@@ -239,7 +239,7 @@ export function ServicesPage() {
     if (!currentUser || selectedServiceIds.length === 0) return;
 
     if (depositRequired && !slipFile) {
-      alert('กรุณาแนบสลิปโอนเงินมัดจำก่อนยืนยันการจอง');
+      alert(language === 'th' ? 'กรุณาแนบสลิปโอนเงินมัดจำก่อนยืนยันการจอง' : 'Please attach bank transfer slip before confirming');
       return;
     }
 
@@ -251,7 +251,7 @@ export function ServicesPage() {
           slipUrl = await uploadSlip(slipFile, currentUser.id);
         } catch (uploadErr) {
           console.error('Slip upload failed:', uploadErr);
-          alert('อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+          alert(language === 'th' ? 'อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' : 'Failed to upload slip. Please try again.');
           return;
         }
       }
@@ -267,7 +267,7 @@ export function ServicesPage() {
         depositAmount: depositRequired ? depositAmount : 0,
         depositStatus: depositRequired ? 'pending_verification' : 'none',
         slipUrl,
-        note: bookingNote ? `${bookingNote} (โทร: ${customerPhone})` : `(โทร: ${customerPhone})`,
+        note: bookingNote ? `${bookingNote} (Tel: ${customerPhone})` : `(Tel: ${customerPhone})`,
       });
 
       // Send confirmation to LINE chat
@@ -281,11 +281,20 @@ export function ServicesPage() {
       setShowSuccessModal(true);
     } catch (err) {
       console.error('Booking failed:', err);
-      alert('เกิดข้อผิดพลาดในการบันทึกการจองคิว');
+      alert(language === 'th' ? 'เกิดข้อผิดพลาดในการบันทึกการจองคิว' : 'An error occurred while saving your booking.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const categories: { key: ServiceCategory | 'all'; label: string; icon: string }[] = [
+    { key: 'all', label: t('allCategories'), icon: '✨' },
+    { key: 'hair', label: t('catHair'), icon: '💇‍♀️' },
+    { key: 'nails', label: t('catNails'), icon: '💅' },
+    { key: 'spa', label: t('catSpa'), icon: '🌿' },
+    { key: 'makeup', label: t('catMakeup'), icon: '💄' },
+    { key: 'skincare', label: t('catSkincare'), icon: '🧖‍♀️' },
+  ];
 
   const filteredServices = services.filter((s) => {
     if (!s.is_active) return false;
@@ -300,9 +309,9 @@ export function ServicesPage() {
       {/* Stepper Indicator */}
       <div className="mb-6 px-2">
         <div className="flex items-center justify-between text-xs font-medium text-[#636260] mb-2">
-          <span className={currentStep >= 1 ? 'text-[#7a5646] font-bold' : ''}>1. เลือกสาขา & บริการ</span>
-          <span className={currentStep >= 2 ? 'text-[#7a5646] font-bold' : ''}>2. วัน เวลา & ช่าง</span>
-          <span className={currentStep >= 3 ? 'text-[#7a5646] font-bold' : ''}>3. สรุปยอด & มัดจำ</span>
+          <span className={currentStep >= 1 ? 'text-[#7a5646] font-bold' : ''}>{t('step1')}</span>
+          <span className={currentStep >= 2 ? 'text-[#7a5646] font-bold' : ''}>{t('step2')}</span>
+          <span className={currentStep >= 3 ? 'text-[#7a5646] font-bold' : ''}>{t('step3')}</span>
         </div>
         <div className="w-full flex items-center gap-1.5 h-1.5 bg-[#e4e2e1] rounded-full overflow-hidden">
           <div className={`h-full transition-all duration-300 rounded-full ${currentStep >= 1 ? 'bg-[#7a5646] w-1/3' : 'w-0'}`} />
@@ -318,7 +327,7 @@ export function ServicesPage() {
           <div className="bg-[#fcf9f8] p-4 sm:p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm">
             <label className="block font-serif text-lg font-bold text-[#1b1c1c] mb-2 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-[#7a5646]" />
-              เลือกสาขาที่ต้องการเข้ารับบริการ
+              {t('selectBranchTitle')}
             </label>
             <select
               value={selectedBranchId}
@@ -347,19 +356,19 @@ export function ServicesPage() {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="ค้นหาชื่อบริการ..."
+                  placeholder={t('searchPlaceholder')}
                   className="pl-9 bg-[#fcf9f8] border-[#d4c3bc]/70 rounded-full text-xs h-10"
                 />
               </div>
 
               <div className="text-xs text-[#7a5646] font-medium self-center bg-[#7a5646]/10 px-3 py-1.5 rounded-full">
-                💡 ติ๊กเลือกได้หลายบริการในคิวเดียว (Multipicklist)
+                💡 {t('multipicklistNotice')}
               </div>
             </div>
 
             {/* Category Pills */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {CATEGORIES.map((cat) => {
+              {categories.map((cat) => {
                 const isActive = selectedCategory === cat.key;
                 return (
                   <button
@@ -387,7 +396,7 @@ export function ServicesPage() {
               ))
             ) : filteredServices.length === 0 ? (
               <div className="text-center py-12 bg-[#fcf9f8] rounded-2xl border border-dashed border-[#d4c3bc] p-6 text-sm text-[#636260]">
-                ไม่พบบริการที่ค้นหา
+                {language === 'th' ? 'ไม่พบบริการที่ค้นหา' : 'No services found matching your query'}
               </div>
             ) : (
               filteredServices.map((service) => {
@@ -424,7 +433,7 @@ export function ServicesPage() {
                         </Badge>
                         {service.deposit_required && (
                           <span className="text-[10px] text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded font-medium">
-                            มัดจำ ฿{service.deposit_amount}
+                            {t('depositRequired')}: ฿{service.deposit_amount}
                           </span>
                         )}
                       </div>
@@ -442,7 +451,7 @@ export function ServicesPage() {
                         </span>
                         <span className="text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {service.duration_minutes} นาที
+                          {service.duration_minutes} {t('minutes')}
                         </span>
                       </div>
                     </div>
@@ -465,9 +474,11 @@ export function ServicesPage() {
                 <span className="font-serif font-bold text-sm sm:text-base uppercase tracking-wider text-[#1b1c1c]">
                   {ENGLISH_MONTH_NAMES[currentMonthIndex]} {currentYear}
                 </span>
-                <span className="text-xs text-[#7a5646] font-medium hidden sm:inline">
-                  ({THAI_FULL_MONTH_NAMES[currentMonthIndex]} {currentYear + 543})
-                </span>
+                {language === 'th' && (
+                  <span className="text-xs text-[#7a5646] font-medium hidden sm:inline">
+                    ({THAI_FULL_MONTH_NAMES[currentMonthIndex]} {currentYear + 543})
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-1.5">
@@ -480,7 +491,7 @@ export function ServicesPage() {
                       ? 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed'
                       : 'bg-[#e8ded8] hover:bg-[#d8cac2] text-[#636260] cursor-pointer'
                   }`}
-                  title="เดือนก่อนหน้า"
+                  title="Previous Month"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -488,7 +499,7 @@ export function ServicesPage() {
                   type="button"
                   onClick={handleNextMonth}
                   className="w-7 h-7 rounded-full bg-[#e8ded8] hover:bg-[#d8cac2] text-[#636260] flex items-center justify-center transition-colors cursor-pointer"
-                  title="เดือนถัดไป"
+                  title="Next Month"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -544,13 +555,13 @@ export function ServicesPage() {
             {/* Selected Date Summary Display */}
             <div className="p-2.5 bg-[#f5f0ea] rounded-xl flex items-center justify-between text-xs border border-[#d4c3bc]/50 text-[#1b1c1c] mt-2">
               <div className="flex items-center gap-2">
-                <span className="text-[#636260]">วันที่เลือก:</span>
+                <span className="text-[#636260]">{t('selectedDateLabel')}</span>
                 <span className="font-bold text-[#7a5646]">
-                  {formatThaiDateDisplay(selectedDate)}
+                  {formatLocalizedDateDisplay(selectedDate, language)}
                 </span>
               </div>
               <Badge variant="outline" className="text-[10px] border-[#7a5646]/40 text-[#7a5646] bg-card">
-                ยืนยันวันแล้ว
+                {t('dateConfirmed')}
               </Badge>
             </div>
           </div>
@@ -558,10 +569,10 @@ export function ServicesPage() {
           {/* 2. Stylist Selector */}
           <div className="bg-[#fcf9f8] p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm">
             <h3 className="font-serif text-lg font-bold text-[#1b1c1c] mb-1">
-              เลือกช่างประจำการจอง (Select Stylist)
+              {t('selectStylistTitle')}
             </h3>
             <p className="text-xs text-[#636260] mb-4">
-              เลือกช่างที่ต้องการ หรือเลือก "ช่างคนไหนก็ได้" เพื่อรอบเวลาที่รวดเร็วที่สุด
+              {t('selectStylistSubtitle')}
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -579,9 +590,9 @@ export function ServicesPage() {
                 }`}>
                   <Users className="w-7 h-7" />
                 </div>
-                <h4 className="font-semibold text-xs leading-tight">ช่างคนไหนก็ได้</h4>
+                <h4 className="font-semibold text-xs leading-tight">{t('anyStylist')}</h4>
                 <p className={`text-[10px] mt-0.5 ${selectedStylistId === 'any' ? 'text-white/80' : 'text-muted-foreground'}`}>
-                  First Available
+                  {t('firstAvailable')}
                 </p>
               </div>
 
@@ -625,11 +636,11 @@ export function ServicesPage() {
           {/* Time Slots */}
           <div className="bg-[#fcf9f8] p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm space-y-4">
             <h3 className="font-serif text-lg font-bold text-[#1b1c1c]">
-              เลือกรอบเวลา (Select Time)
+              {t('selectTimeTitle')}
             </h3>
 
             <div>
-              <p className="text-xs font-semibold text-[#636260] uppercase tracking-wider mb-2">ช่วงเช้า (Morning)</p>
+              <p className="text-xs font-semibold text-[#636260] uppercase tracking-wider mb-2">{t('morning')}</p>
               <div className="grid grid-cols-3 gap-2">
                 {MORNING_SLOTS.map((slot) => (
                   <button
@@ -641,14 +652,14 @@ export function ServicesPage() {
                         : 'bg-card border-[#d4c3bc]/60 text-[#1b1c1c] hover:bg-[#e8ded8]'
                     }`}
                   >
-                    {slot} น.
+                    {slot} {t('minsShort')}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-[#636260] uppercase tracking-wider mb-2">ช่วงบ่าย - เย็น (Afternoon)</p>
+              <p className="text-xs font-semibold text-[#636260] uppercase tracking-wider mb-2">{t('afternoon')}</p>
               <div className="grid grid-cols-3 gap-2">
                 {AFTERNOON_SLOTS.map((slot) => (
                   <button
@@ -660,7 +671,7 @@ export function ServicesPage() {
                         : 'bg-card border-[#d4c3bc]/60 text-[#1b1c1c] hover:bg-[#e8ded8]'
                     }`}
                   >
-                    {slot} น.
+                    {slot} {t('minsShort')}
                   </button>
                 ))}
               </div>
@@ -675,7 +686,7 @@ export function ServicesPage() {
           {/* Summary Details Card */}
           <Card className="bg-[#fcf9f8] border-[#d4c3bc]/60 p-5 rounded-3xl shadow-sm space-y-4">
             <h3 className="font-serif text-xl font-bold text-[#1b1c1c] border-b border-[#d4c3bc]/50 pb-3">
-              สรุปข้อมูลการจอง (Booking Summary)
+              {t('summaryTitle')}
             </h3>
 
             {/* Branch & Stylist Info */}
@@ -683,7 +694,7 @@ export function ServicesPage() {
               <div className="p-3 bg-[#f6f3f2] rounded-xl flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-[#7a5646] flex-shrink-0" />
                 <div>
-                  <span className="text-muted-foreground block text-[10px]">สาขา</span>
+                  <span className="text-muted-foreground block text-[10px]">{t('branch')}</span>
                   <span className="font-bold text-[#1b1c1c]">{selectedBranch?.name}</span>
                 </div>
               </div>
@@ -691,35 +702,35 @@ export function ServicesPage() {
               <div className="p-3 bg-[#f6f3f2] rounded-xl flex items-center gap-3">
                 <User className="w-5 h-5 text-[#7a5646] flex-shrink-0" />
                 <div>
-                  <span className="text-muted-foreground block text-[10px]">ช่างผู้ให้บริการ</span>
-                  <span className="font-bold text-[#1b1c1c]">{selectedStylist?.name || 'ช่างคนไหนก็ได้ (First Available)'}</span>
+                  <span className="text-muted-foreground block text-[10px]">{t('stylist')}</span>
+                  <span className="font-bold text-[#1b1c1c]">{selectedStylist?.name || t('anyStylist')}</span>
                 </div>
               </div>
 
               <div className="p-3 bg-[#f6f3f2] rounded-xl flex items-center gap-3">
                 <CalendarIcon className="w-5 h-5 text-[#7a5646] flex-shrink-0" />
                 <div>
-                  <span className="text-muted-foreground block text-[10px]">วัน-เวลานัดหมาย</span>
-                  <span className="font-bold text-[#1b1c1c]">{selectedDate} เวลา {selectedTime} น.</span>
+                  <span className="text-muted-foreground block text-[10px]">{t('appointmentDate')}</span>
+                  <span className="font-bold text-[#1b1c1c]">{selectedDate} ({selectedTime} {t('minsShort')})</span>
                 </div>
               </div>
 
               <div className="p-3 bg-[#f6f3f2] rounded-xl flex items-center gap-3">
                 <Clock className="w-5 h-5 text-[#7a5646] flex-shrink-0" />
                 <div>
-                  <span className="text-muted-foreground block text-[10px]">ระยะเวลารวม</span>
-                  <span className="font-bold text-[#1b1c1c]">{totalDuration} นาที</span>
+                  <span className="text-muted-foreground block text-[10px]">{t('totalDuration')}</span>
+                  <span className="font-bold text-[#1b1c1c]">{totalDuration} {t('minutes')}</span>
                 </div>
               </div>
             </div>
 
             {/* Selected Services List */}
             <div className="pt-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#636260] mb-2">รายการบริการที่เลือก ({selectedServices.length}):</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#636260] mb-2">{t('serviceItems')} ({selectedServices.length}):</p>
               <div className="space-y-2">
                 {selectedServices.map((s) => (
                   <div key={s.id} className="flex justify-between items-center text-xs py-1.5 border-b border-[#d4c3bc]/30">
-                    <span className="text-[#1b1c1c]">{s.name} ({s.duration_minutes} นาที)</span>
+                    <span className="text-[#1b1c1c]">{s.name} ({s.duration_minutes} {t('minutes')})</span>
                     <span className="font-serif font-bold text-[#7a5646]">฿{s.price.toLocaleString()}</span>
                   </div>
                 ))}
@@ -729,17 +740,17 @@ export function ServicesPage() {
             {/* Price Breakdown */}
             <div className="p-4 bg-[#f6f3f2] rounded-2xl border border-[#d4c3bc]/60 space-y-2 text-xs">
               <div className="flex justify-between text-[#636260]">
-                <span>ยอดรวมค่าบริการ</span>
+                <span>{t('totalPrice')}</span>
                 <span>฿{totalPrice.toLocaleString()}</span>
               </div>
               {depositRequired && (
                 <div className="flex justify-between text-amber-800 font-medium">
-                  <span>ยอดเงินมัดจำ (ชำระตอนนี้)</span>
+                  <span>{t('depositRequired')}</span>
                   <span>฿{depositAmount.toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between text-base font-serif font-bold text-[#1b1c1c] pt-2 border-t border-[#d4c3bc]/40">
-                <span>ยอดชำระที่ร้านหลังหักมัดจำ</span>
+                <span>{language === 'th' ? 'ยอดชำระที่ร้านหลังหักมัดจำ' : 'Remaining balance to pay at salon'}</span>
                 <span className="text-[#7a5646]">฿{(totalPrice - (depositRequired ? depositAmount : 0)).toLocaleString()}</span>
               </div>
             </div>
@@ -751,11 +762,11 @@ export function ServicesPage() {
               <div className="flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-amber-700" />
                 <h3 className="font-serif text-lg font-bold text-amber-900">
-                  ชำระเงินมัดจำล่วงหน้า (฿{depositAmount.toLocaleString()})
+                  {t('depositRequired')} (฿{depositAmount.toLocaleString()})
                 </h3>
               </div>
               <p className="text-xs text-[#636260]">
-                บริการที่เลือกต้องวางเงินมัดจำเพื่อยืนยันคิวช่าง กรุณาสแกน QR Code พร้อมเพย์ และแนบสลิปด้านล่าง
+                {t('depositNotice')}
               </p>
 
               {/* QR Code Container */}
@@ -773,7 +784,7 @@ export function ServicesPage() {
 
               {/* Upload Slip */}
               <div className="pt-2">
-                <label className="block text-xs font-semibold text-[#1b1c1c] mb-1.5">หลักฐานการโอนเงิน (สลิป):</label>
+                <label className="block text-xs font-semibold text-[#1b1c1c] mb-1.5">{t('attachSlip')}:</label>
                 <label
                   htmlFor="slip-file-input"
                   className={`block p-4 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-colors ${
@@ -790,16 +801,16 @@ export function ServicesPage() {
                     onChange={handleSlipSelected}
                   />
                   {slipPreview ? (
-                    <img src={slipPreview} alt="สลิปโอนเงิน" className="max-h-48 mx-auto rounded-xl mb-2 object-contain" />
+                    <img src={slipPreview} alt="Deposit Slip" className="max-h-48 mx-auto rounded-xl mb-2 object-contain" />
                   ) : (
                     <Upload className="w-6 h-6 mx-auto mb-1" />
                   )}
                   {slipUploaded ? (
                     <span className="text-xs font-semibold flex items-center justify-center gap-1">
-                      <Check className="w-4 h-4" /> เลือกสลิปแล้ว (คลิกเพื่อเปลี่ยน)
+                      <Check className="w-4 h-4" /> {t('changeSlip')}
                     </span>
                   ) : (
-                    <span className="text-xs">คลิกเพื่ออัปโหลดรูปภาพสลิปโอนเงิน</span>
+                    <span className="text-xs">{t('attachSlip')}</span>
                   )}
                 </label>
               </div>
@@ -809,12 +820,13 @@ export function ServicesPage() {
           {/* Customer Phone & Note */}
           <div className="bg-[#fcf9f8] p-5 rounded-2xl border border-[#d4c3bc]/60 space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-[#1b1c1c] mb-1">เบอร์โทรศัพท์ติดต่อสำหรับยืนยันคิว *</label>
+              <label className="block text-xs font-semibold text-[#1b1c1c] mb-1">{t('contactPhone')} *</label>
               <div className="relative">
                 <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder={t('phonePlaceholder')}
                   className="pl-9 bg-card border-[#d4c3bc] rounded-xl text-xs h-10"
                   required
                 />
@@ -822,13 +834,13 @@ export function ServicesPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#1b1c1c] mb-1">หมายเหตุเพิ่มเติม</label>
+              <label className="block text-xs font-semibold text-[#1b1c1c] mb-1">{t('customerNote')}</label>
               <div className="relative">
                 <MessageSquare className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                 <Input
                   value={bookingNote}
                   onChange={(e) => setBookingNote(e.target.value)}
-                  placeholder="เช่น ระบุเรฟเฟอเรนซ์สีผม, มีอาการแพ้สารเคมี"
+                  placeholder={t('notePlaceholder')}
                   className="pl-9 bg-card border-[#d4c3bc] rounded-xl text-xs h-10"
                 />
               </div>
@@ -842,7 +854,7 @@ export function ServicesPage() {
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-xs text-[#636260]">
-              {selectedServiceIds.length} บริการ • {totalDuration} นาที
+              {selectedServiceIds.length} {t('selectedServicesCount')} • {totalDuration} {t('minutes')}
             </span>
             <span className="font-serif text-xl font-bold text-[#7a5646]">
               ฿{totalPrice.toLocaleString()}
@@ -856,7 +868,7 @@ export function ServicesPage() {
                 onClick={() => setCurrentStep((prev) => (prev - 1) as any)}
                 className="border-[#d4c3bc] text-[#636260] rounded-full text-xs px-4 h-11"
               >
-                <ArrowLeft className="w-3.5 h-3.5 mr-1" /> ย้อนกลับ
+                <ArrowLeft className="w-3.5 h-3.5 mr-1" /> {t('back')}
               </Button>
             )}
 
@@ -866,7 +878,7 @@ export function ServicesPage() {
                 onClick={() => setCurrentStep(2)}
                 className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full text-xs sm:text-sm px-6 h-11 shadow-md shadow-[#7a5646]/20 font-medium"
               >
-                ถัดไป: เลือกวัน & ช่าง
+                {t('nextSelectDateTime')}
                 <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             )}
@@ -876,7 +888,7 @@ export function ServicesPage() {
                 onClick={() => setCurrentStep(3)}
                 className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full text-xs sm:text-sm px-6 h-11 shadow-md shadow-[#7a5646]/20 font-medium"
               >
-                ถัดไป: สรุปข้อมูล & มัดจำ
+                {t('nextSummary')}
                 <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             )}
@@ -887,7 +899,7 @@ export function ServicesPage() {
                 onClick={handleConfirmBooking}
                 className="bg-[#7a5646] hover:bg-[#634335] text-white rounded-full text-xs sm:text-sm px-6 h-11 shadow-md shadow-[#7a5646]/20 font-medium"
               >
-                {isSubmitting ? 'กำลังส่งข้อมูลการจอง...' : 'ยืนยันการจองคิว'}
+                {isSubmitting ? t('submitting') : t('confirmBookingButton')}
               </Button>
             )}
           </div>
@@ -903,18 +915,18 @@ export function ServicesPage() {
             </div>
 
             <div>
-              <h3 className="font-serif text-2xl font-bold text-[#1b1c1c]">จองคิวสำเร็จ!</h3>
+              <h3 className="font-serif text-2xl font-bold text-[#1b1c1c]">{t('bookingSuccessTitle')}</h3>
               <p className="text-xs text-[#636260] mt-1.5 leading-relaxed">
-                การนัดหมายของคุณกับ {selectedStylist?.name || 'ช่างมืออาชีพ'} ที่ {selectedBranch?.name} ได้รับการบันทึกแล้ว
+                {t('bookingSuccessSubtitle')}
               </p>
             </div>
 
             <div className="p-3 bg-[#f6f3f2] rounded-xl text-xs space-y-1 text-left border border-[#d4c3bc]/50">
-              <p><strong>วันที่:</strong> {selectedDate}</p>
-              <p><strong>เวลา:</strong> {selectedTime} น. ({totalDuration} นาที)</p>
-              <p><strong>ยอดเงินรวม:</strong> ฿{totalPrice.toLocaleString()}</p>
+              <p><strong>{t('appointmentDate')}:</strong> {selectedDate} ({selectedTime} {t('minsShort')})</p>
+              <p><strong>{t('totalDuration')}:</strong> {totalDuration} {t('minutes')}</p>
+              <p><strong>{t('totalPrice')}:</strong> ฿{totalPrice.toLocaleString()}</p>
               {depositRequired && (
-                <p><strong>สถานะมัดจำ:</strong> <span className="text-amber-800 font-medium">รอการตรวจสอบสลิป</span></p>
+                <p><strong>{t('depositRequired')}:</strong> <span className="text-amber-800 font-medium">{t('depositStatusPending')}</span></p>
               )}
             </div>
 
@@ -926,7 +938,7 @@ export function ServicesPage() {
                 }}
                 className="w-full bg-[#7a5646] hover:bg-[#634335] text-white rounded-xl py-5 text-xs font-semibold"
               >
-                ดูการจองของฉัน
+                {t('checkMyBookings')}
               </Button>
               <Button
                 variant="ghost"
@@ -936,7 +948,7 @@ export function ServicesPage() {
                 }}
                 className="w-full text-xs text-[#636260]"
               >
-                กลับสู่หน้าหลัก
+                {t('home')}
               </Button>
             </div>
           </div>

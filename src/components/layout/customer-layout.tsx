@@ -10,18 +10,23 @@ import {
   Scissors, 
   LogOut, 
   ChevronDown,
-  LogIn
+  LogIn,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { KikiLogo } from '@/components/common/kiki-logo';
+import { useLanguageStore } from '@/stores/language-store';
 
 export function CustomerLayout() {
   const { user, isAuthenticated, logout } = useAuthStore();
+  const { language, toggleLanguage, syncLiffLanguage, t } = useLanguageStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
+    // Automatically synchronize language from LIFF / Line client
+    syncLiffLanguage();
     // When inside LINE or if user has demo cache, automatically pull real LINE profile
     if (isInLineApp() || !user || user.line_user_id?.startsWith('demo_') || user.display_name?.includes('มินตรา')) {
       authenticateWithLine();
@@ -37,9 +42,9 @@ export function CustomerLayout() {
   };
 
   const navItems = [
-    { name: 'หน้าแรก', path: '/', icon: Home },
-    { name: 'บริการทั้งหมด', path: '/services', icon: Scissors },
-    { name: 'การจองของฉัน', path: '/bookings', icon: Calendar },
+    { name: t('home'), path: '/', icon: Home },
+    { name: t('allServices'), path: '/services', icon: Scissors },
+    { name: t('myBookings'), path: '/bookings', icon: Calendar },
   ];
 
   return (
@@ -78,8 +83,20 @@ export function CustomerLayout() {
             })}
           </nav>
 
-          {/* User Profile / Menu */}
-          <div className="relative">
+          {/* Header Right Actions (Language Switcher + User Profile) */}
+          <div className="flex items-center gap-2">
+            {/* Language Switcher Pill */}
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#d4c3bc]/60 bg-card hover:bg-[#e8ded8] text-[#7a5646] transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+              title="Change Language (เปลี่ยนภาษา)"
+            >
+              <Globe className="w-3 h-3 text-[#7a5646]" />
+              <span>{language === 'th' ? 'TH' : 'EN'}</span>
+            </button>
+
+            {/* User Profile / Menu */}
             {isAuthenticated && user ? (
               <div className="relative">
                 <button
@@ -108,7 +125,7 @@ export function CustomerLayout() {
                   <div className="absolute right-0 mt-2 w-56 bg-card rounded-2xl shadow-xl border border-[#d4c3bc]/70 py-2 z-50 animate-in fade-in zoom-in-95">
                     <div className="px-4 py-2 border-b border-[#d4c3bc]/40">
                       <p className="text-xs font-semibold text-[#1b1c1c]">{user.display_name}</p>
-                      <p className="text-[11px] text-[#636260] capitalize">{user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ลูกค้า'}</p>
+                      <p className="text-[11px] text-[#636260] capitalize">{user.role === 'admin' ? t('adminRole') : t('customerRole')}</p>
                     </div>
 
                     <div className="py-1">
@@ -118,7 +135,7 @@ export function CustomerLayout() {
                         className="w-full px-4 py-2 text-left text-xs text-[#7a5646] hover:bg-[#f5f0ea] flex items-center gap-2 font-medium"
                       >
                         <Calendar className="w-3.5 h-3.5" />
-                        การจองคิวของฉัน
+                        {t('myBookings')}
                       </Link>
 
                       {user?.line_user_id?.startsWith('demo_') && (
@@ -130,7 +147,7 @@ export function CustomerLayout() {
                           className="w-full px-4 py-2 text-left text-xs text-[#06C755] hover:bg-emerald-50 flex items-center gap-2 font-medium"
                         >
                           <LogIn className="w-3.5 h-3.5" />
-                          เชื่อมต่อ LINE บัญชีจริง
+                          {t('connectRealLine')}
                         </button>
                       )}
 
@@ -143,7 +160,7 @@ export function CustomerLayout() {
                         className="w-full px-4 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        ออกจากระบบ
+                        {t('logout')}
                       </button>
                     </div>
                   </div>
@@ -156,7 +173,7 @@ export function CustomerLayout() {
                 className="bg-[#06C755] hover:bg-[#05b34c] text-white rounded-full text-xs px-3.5 flex items-center gap-1.5 shadow-sm"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                เข้าสู่ระบบด้วย LINE
+                {t('login')}
               </Button>
             )}
           </div>
