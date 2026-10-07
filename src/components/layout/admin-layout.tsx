@@ -107,9 +107,7 @@ export function AdminLayout() {
       <aside className="hidden md:flex flex-col w-64 border-r border-[#d4c3bc]/60 bg-card">
         {/* Brand */}
         <div className="h-16 flex items-center px-6 border-b border-[#d4c3bc]/50 gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-[#1b1c1c] flex items-center justify-center overflow-hidden shadow-sm border border-[#d4c3bc]/60">
-            <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-full h-full object-cover" />
-          </div>
+          <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-9 h-9 rounded-full object-cover shadow-sm" />
           <div>
             <span className="font-serif font-bold text-base tracking-widest text-[#1b1c1c]">KIKI</span>
             <span className="text-[10px] uppercase tracking-wider text-[#7a5646] block -mt-1 font-bold">Admin Portal</span>
@@ -171,9 +169,7 @@ export function AdminLayout() {
       {/* Mobile Top Header */}
       <header className="md:hidden flex h-16 items-center justify-between px-4 border-b border-[#d4c3bc]/50 bg-card">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[#1b1c1c] flex items-center justify-center overflow-hidden shadow-sm border border-[#d4c3bc]/60">
-            <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-full h-full object-cover" />
-          </div>
+          <img src="https://kikibeautyspace.com/wp-content/themes/kiki/theme/assets/images/logo-icon.png" alt="KIKI" className="w-8 h-8 rounded-full object-cover shadow-sm" />
           <span className="font-serif font-bold text-base text-[#1b1c1c]">KIKI Admin</span>
         </div>
 
