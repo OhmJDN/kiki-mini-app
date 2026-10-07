@@ -107,11 +107,11 @@ export function AdminLayout() {
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex flex-col w-64 border-r border-[#d4c3bc]/60 bg-card">
         {/* Brand */}
-        <div className="h-16 flex items-center px-6 border-b border-[#d4c3bc]/50 gap-2.5">
-          <KikiLogo className="w-9 h-9 text-[#1b1c1c] shrink-0" />
+        <div className="h-16 flex items-center px-5 border-b border-[#d4c3bc]/50 gap-3">
+          <KikiLogo className="w-12 h-12 text-[#1b1c1c] shrink-0" />
           <div>
-            <span className="font-serif font-bold text-base tracking-widest text-[#1b1c1c]">KIKI</span>
-            <span className="text-[10px] uppercase tracking-wider text-[#7a5646] block -mt-1 font-bold">Admin Portal</span>
+            <span className="font-serif font-bold text-lg tracking-widest text-[#1b1c1c]">KIKI</span>
+            <span className="text-[10px] uppercase tracking-wider text-[#7a5646] block -mt-0.5 font-bold">Admin Portal</span>
           </div>
         </div>
 
@@ -169,8 +169,8 @@ export function AdminLayout() {
 
       {/* Mobile Top Header */}
       <header className="md:hidden flex h-16 items-center justify-between px-4 border-b border-[#d4c3bc]/50 bg-card">
-        <div className="flex items-center gap-2">
-          <KikiLogo className="w-8 h-8 text-[#1b1c1c] shrink-0" />
+        <div className="flex items-center gap-2.5">
+          <KikiLogo className="w-11 h-11 text-[#1b1c1c] shrink-0" />
           <span className="font-serif font-bold text-base text-[#1b1c1c]">KIKI Admin</span>
         </div>
 

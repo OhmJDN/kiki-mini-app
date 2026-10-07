@@ -5,12 +5,12 @@ interface KikiLogoProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   size?: number | string;
 }
 
-export function KikiLogo({ className = 'w-9 h-9', size, alt = 'KIKI Logo', style, ...props }: KikiLogoProps) {
+export function KikiLogo({ className = 'w-12 h-12', size, alt = 'KIKI Logo', style, ...props }: KikiLogoProps) {
   return (
     <img
       src="/kiki-logo.jpg"
       alt={alt}
-      className={`object-cover rounded-full ${className}`}
+      className={`object-cover rounded-full shadow-xs ${className}`}
       style={size ? { width: size, height: size, ...style } : style}
       {...props}
     />

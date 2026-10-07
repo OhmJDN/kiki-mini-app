@@ -53,8 +53,8 @@ export function CustomerLayout() {
       <header className="sticky top-0 z-40 w-full border-b border-[#d4c3bc]/50 bg-[#f5f0ea]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <KikiLogo className="w-10 h-10 text-[#1b1c1c] group-hover:scale-105 transition-transform shrink-0" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <KikiLogo className="w-12 h-12 text-[#1b1c1c] group-hover:scale-105 transition-transform shrink-0" />
             <div>
               <span className="font-serif font-bold text-lg tracking-widest text-[#1b1c1c] block leading-none">KIKI</span>
               <span className="text-[9px] uppercase tracking-widest text-[#7a5646] font-semibold">BEAUTY SPACE</span>
