@@ -12,7 +12,9 @@ import {
   X, 
   QrCode, 
   CheckCircle2, 
-  XCircle 
+  XCircle,
+  Maximize2,
+  Eye
 } from 'lucide-react';
 
 export function AdminBookingsPage() {
@@ -28,12 +30,36 @@ export function AdminBookingsPage() {
   );
   const [depositFilter, setDepositFilter] = useState<DepositStatus | 'all'>('all');
   const [branchFilter, setBranchFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [isLoading, setIsLoading] = useState(true);
+
+  // Sync state when URL search params change
+  useEffect(() => {
+    const search = searchParams.get('search');
+    if (search !== null) {
+      setSearchQuery(search);
+    }
+    const status = searchParams.get('status') as BookingStatus | null;
+    if (status) {
+      setStatusFilter(status);
+    }
+  }, [searchParams]);
 
   // Detail Modal & Slip Preview Modal
   const [viewBooking, setViewBooking] = useState<BookingWithRelations | null>(null);
   const [previewSlipUrl, setPreviewSlipUrl] = useState<string | null>(null);
+  const [fullScreenSlipUrl, setFullScreenSlipUrl] = useState<string | null>(null);
+
+  // Close fullscreen slip on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setFullScreenSlipUrl(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // New Walk-in Booking Modal State
   const [isNewBookingModal, setIsNewBookingModal] = useState(false);
@@ -96,6 +122,7 @@ export function AdminBookingsPage() {
         setViewBooking((prev) => (prev ? { ...prev, deposit_status: status, status: status === 'verified' ? 'confirmed' : prev.status } : null));
       }
       setPreviewSlipUrl(null);
+      setFullScreenSlipUrl(null);
     } catch (err) {
       console.error('Verify slip failed:', err);
     }
@@ -220,8 +247,17 @@ export function AdminBookingsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาชื่อลูกค้า, เบอร์, บริการ..."
-              className="pl-9 bg-card border-[#d4c3bc]/60 rounded-full text-xs h-9"
+              className="pl-9 pr-8 bg-card border-[#d4c3bc]/60 rounded-full text-xs h-9"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -305,15 +341,22 @@ export function AdminBookingsPage() {
                           ฿{(b.total_price || b.service?.price || 0).toLocaleString()}
                         </div>
                         {b.deposit_amount > 0 ? (
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <span className="text-[10px] text-amber-800">มัดจำ ฿{b.deposit_amount}</span>
-                            {b.slip_url && (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[10px] text-amber-800 font-medium">มัดจำ ฿{b.deposit_amount}</span>
+                            {b.slip_url ? (
                               <button
-                                onClick={() => setPreviewSlipUrl(b.slip_url || null)}
-                                className="text-[10px] text-blue-600 underline hover:text-blue-800"
+                                onClick={() => {
+                                  setViewBooking(b);
+                                  setFullScreenSlipUrl(b.slip_url || null);
+                                }}
+                                className="group relative inline-flex items-center gap-1 text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300 transition-all cursor-pointer shadow-xs hover:scale-105"
+                                title="กดดูสลิปเต็มจอ"
                               >
-                                [ดูสลิป]
+                                <Eye className="w-3 h-3 text-amber-700 group-hover:scale-110 transition-transform" />
+                                <span>ดูสลิป</span>
                               </button>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground">(ยังไม่แนบ)</span>
                             )}
                           </div>
                         ) : (
@@ -411,8 +454,22 @@ export function AdminBookingsPage() {
               </button>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-[#d4c3bc] max-h-80 flex items-center justify-center bg-black/5">
-              <img src={previewSlipUrl} alt="Slip" className="w-full h-full object-contain" />
+            <div 
+              onClick={() => setFullScreenSlipUrl(previewSlipUrl)}
+              className="group relative cursor-pointer rounded-2xl overflow-hidden border border-[#d4c3bc] max-h-80 flex items-center justify-center bg-black/5 transition-all hover:border-[#7a5646] hover:shadow-md"
+              title="คลิกเพื่อดูสลิปเต็มจอ"
+            >
+              <img 
+                src={previewSlipUrl} 
+                alt="Slip" 
+                className="w-full h-full max-h-80 object-contain transition-transform duration-300 group-hover:scale-105" 
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white backdrop-blur-[1px]">
+                <div className="bg-black/75 text-white px-3.5 py-2 rounded-full flex items-center gap-1.5 text-xs font-medium shadow-lg transform scale-95 group-hover:scale-100 transition-transform">
+                  <Maximize2 className="w-3.5 h-3.5 text-amber-300" />
+                  <span>คลิกเพื่อดูสลิปเต็มจอ</span>
+                </div>
+              </div>
             </div>
 
             {viewBooking && (
@@ -446,7 +503,7 @@ export function AdminBookingsPage() {
       {/* Booking Details Modal */}
       {viewBooking && !previewSlipUrl && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#fcf9f8] w-full max-w-md rounded-3xl p-6 shadow-2xl border border-[#d4c3bc] space-y-4">
+          <div className="bg-[#fcf9f8] w-full max-w-md rounded-3xl p-6 shadow-2xl border border-[#d4c3bc] space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#d4c3bc]/50 pb-3">
               <h3 className="font-serif text-lg font-bold text-[#1b1c1c]">รายละเอียดการจองคิว</h3>
               <button onClick={() => setViewBooking(null)} className="p-1 rounded-full hover:bg-muted text-muted-foreground">
@@ -471,6 +528,39 @@ export function AdminBookingsPage() {
                   <p><strong>มัดจำ:</strong> ฿{viewBooking.deposit_amount.toLocaleString()} ({viewBooking.deposit_status})</p>
                 )}
               </div>
+
+              {/* Deposit Slip in Detail Modal */}
+              {viewBooking.slip_url && (
+                <div className="p-3 bg-[#f5f0ea] rounded-xl space-y-2 border border-[#d4c3bc]/50">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-[#1b1c1c]">สลิปโอนเงินมัดจำ:</span>
+                    <button 
+                      type="button"
+                      onClick={() => setFullScreenSlipUrl(viewBooking.slip_url || null)}
+                      className="text-[11px] text-[#7a5646] hover:underline flex items-center gap-1 font-medium cursor-pointer"
+                    >
+                      <Maximize2 className="w-3 h-3" /> ดูเต็มจอ
+                    </button>
+                  </div>
+                  <div 
+                    onClick={() => setFullScreenSlipUrl(viewBooking.slip_url || null)}
+                    className="group relative cursor-pointer rounded-xl overflow-hidden border border-[#d4c3bc] max-h-48 flex items-center justify-center bg-black/5"
+                    title="คลิกดูเต็มจอ"
+                  >
+                    <img 
+                      src={viewBooking.slip_url} 
+                      alt="Slip" 
+                      className="w-full h-full max-h-48 object-contain transition-transform duration-300 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white text-xs font-medium backdrop-blur-[1px]">
+                      <div className="bg-black/75 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-medium shadow-lg">
+                        <Maximize2 className="w-3.5 h-3.5 text-amber-300" />
+                        <span>คลิกดูเต็มจอ</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {viewBooking.note && (
                 <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
@@ -512,6 +602,77 @@ export function AdminBookingsPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Fullscreen Slip Lightbox Modal */}
+      {fullScreenSlipUrl && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 transition-all animate-in fade-in duration-200"
+          onClick={() => setFullScreenSlipUrl(null)}
+        >
+          {/* Top Bar */}
+          <div 
+            className="w-full max-w-4xl flex items-center justify-between text-white pb-2 z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-serif font-bold text-base sm:text-lg">สลิปโอนเงินมัดจำ (เต็มจอ)</span>
+              {viewBooking && (
+                <Badge className="bg-white/20 text-white border-white/30 text-xs">
+                  {viewBooking.customer?.display_name} • ฿{viewBooking.deposit_amount.toLocaleString()}
+                </Badge>
+              )}
+            </div>
+            <button 
+              onClick={() => setFullScreenSlipUrl(null)} 
+              className="p-2 rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors cursor-pointer"
+              title="ปิด (Esc)"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Image Container */}
+          <div 
+            className="flex-1 flex items-center justify-center w-full max-w-4xl overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={fullScreenSlipUrl} 
+              alt="Slip Fullscreen" 
+              className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl border border-white/10 select-none cursor-zoom-out"
+              onClick={() => setFullScreenSlipUrl(null)}
+            />
+          </div>
+
+          {/* Bottom Actions if in verification flow */}
+          {viewBooking && viewBooking.deposit_status === 'pending_verification' && (
+            <div 
+              className="w-full max-w-md flex items-center justify-center gap-3 pt-3 z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                onClick={() => {
+                  handleVerifySlip(viewBooking.id, 'verified');
+                  setFullScreenSlipUrl(null);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm rounded-xl px-5 py-2.5 shadow-lg flex-1 cursor-pointer"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-1.5" /> ยืนยันสลิปถูกต้อง
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  handleVerifySlip(viewBooking.id, 'rejected');
+                  setFullScreenSlipUrl(null);
+                }}
+                className="border-rose-400 bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 hover:text-white text-xs sm:text-sm rounded-xl px-5 py-2.5 flex-1 cursor-pointer"
+              >
+                <XCircle className="w-4 h-4 mr-1.5" /> สลิปไม่ถูกต้อง
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

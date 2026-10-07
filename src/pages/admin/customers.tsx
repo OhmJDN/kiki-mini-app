@@ -149,7 +149,7 @@ export function AdminCustomersPage() {
                         size="sm"
                         className="text-xs text-[#7a5646] hover:bg-[#7a5646]/10 h-7 px-2.5 rounded-lg"
                       >
-                        <Link to={`/admin/bookings?search=${encodeURIComponent(c.display_name)}`}>
+                        <Link to={`/admin/bookings?search=${encodeURIComponent(c.display_name || '')}`}>
                           ดูคิวของลูกค้านี้ →
                         </Link>
                       </Button>

@@ -14,7 +14,12 @@ export async function uploadSlip(file: File, userId: string): Promise<string> {
   const { error } = await supabase.storage
     .from(SLIP_BUCKET)
     .upload(path, file, { contentType: file.type, upsert: false });
-  if (error) throw error;
+  if (error) {
+    const detail = error as unknown as { message?: string; statusCode?: string; error?: string };
+    throw new Error(
+      `Storage upload failed: ${detail.message ?? 'unknown'} (status ${detail.statusCode ?? '?'}, ${detail.error ?? ''})`
+    );
+  }
 
   return supabase.storage.from(SLIP_BUCKET).getPublicUrl(path).data.publicUrl;
 }

@@ -25,8 +25,32 @@ import {
   Upload, 
   ArrowRight, 
   ArrowLeft, 
-  Check 
+  Check,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+
+const THAI_DAY_NAMES = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+const THAI_FULL_DAY_NAMES = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+const THAI_MONTH_NAMES = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const THAI_FULL_MONTH_NAMES = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+function formatDateToYMD(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatThaiDateDisplay(dateStr: string): string {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  const dayName = THAI_FULL_DAY_NAMES[dateObj.getDay()];
+  const monthName = THAI_FULL_MONTH_NAMES[m - 1];
+  const thaiYear = y + 543;
+  return `${dayName}ที่ ${d} ${monthName} ${thaiYear}`;
+}
 
 const CATEGORIES: { key: ServiceCategory | 'all'; label: string; icon: string }[] = [
   { key: 'all', label: 'ทั้งหมด', icon: '✨' },
@@ -61,13 +85,36 @@ export function ServicesPage() {
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
 
   // Step 2: Date, Time & Stylist Selection
+  const [dateStartIndex, setDateStartIndex] = useState(0);
   const [selectedDate, setSelectedDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().split('T')[0];
+    return formatDateToYMD(new Date());
   });
   const [selectedTime, setSelectedTime] = useState<string>('13:00');
   const [selectedStylistId, setSelectedStylistId] = useState<string>('any'); // 'any' or stylist.id
+
+  // Generate 14 upcoming days
+  const availableDates = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + dateStartIndex + i);
+    const dateString = formatDateToYMD(d);
+    
+    const today = new Date();
+    const isToday = d.toDateString() === today.toDateString();
+    
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    const isTomorrow = d.toDateString() === tomorrow.toDateString();
+
+    return {
+      date: d,
+      dateString,
+      dayNumber: d.getDate(),
+      dayName: THAI_DAY_NAMES[d.getDay()],
+      monthName: THAI_MONTH_NAMES[d.getMonth()],
+      isToday,
+      isTomorrow,
+    };
+  });
 
   // Step 3: Summary, Contact & Deposit Slip
   const [customerPhone, setCustomerPhone] = useState(user?.phone || '081-234-5678');
@@ -377,7 +424,133 @@ export function ServicesPage() {
       {/* ================= STEP 2: DATE, TIME & STYLIST SELECTION ================= */}
       {currentStep === 2 && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* Stylist Selector */}
+          {/* 1. Date Selector (Visual Day Cards Display) */}
+          <div className="bg-[#fcf9f8] p-4 sm:p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[#1b1c1c] flex items-center gap-2">
+                  <CalendarIcon className="w-5 h-5 text-[#7a5646]" />
+                  <span>เลือกวันที่นัดหมาย (Select Date)</span>
+                </h3>
+                <p className="text-xs text-[#636260] mt-0.5">
+                  กดเลือกวันที่ต้องการเข้ารับบริการได้ทันที
+                </p>
+              </div>
+
+              {/* Navigation controls & custom date picker */}
+              <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  disabled={dateStartIndex === 0}
+                  onClick={() => setDateStartIndex((prev) => Math.max(0, prev - 7))}
+                  className="h-8 px-2 text-xs border-[#d4c3bc]/60 rounded-lg text-[#636260] hover:text-[#1b1c1c]"
+                  title="7 วันก่อนหน้า"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => setDateStartIndex((prev) => prev + 7)}
+                  className="h-8 px-2 text-xs border-[#d4c3bc]/60 rounded-lg text-[#636260] hover:text-[#1b1c1c]"
+                  title="7 วันถัดไป"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+
+                {/* Optional Custom Date Picker input styled as a button */}
+                <label className="relative inline-flex items-center justify-center h-8 px-2.5 bg-card border border-[#d4c3bc]/60 hover:bg-[#e8ded8] rounded-lg text-xs text-[#7a5646] font-medium cursor-pointer transition-colors shadow-xs">
+                  <CalendarIcon className="w-3.5 h-3.5 mr-1" />
+                  <span>เลือกวันอื่น</span>
+                  <input
+                    type="date"
+                    min={formatDateToYMD(new Date())}
+                    value={selectedDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setSelectedDate(e.target.value);
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Visual Day Cards Grid */}
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+              {availableDates.map((item) => {
+                const isSelected = selectedDate === item.dateString;
+                return (
+                  <button
+                    key={item.dateString}
+                    type="button"
+                    onClick={() => setSelectedDate(item.dateString)}
+                    className={`p-2 sm:p-2.5 rounded-xl border flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 relative group select-none ${
+                      isSelected
+                        ? 'bg-[#7a5646] text-white border-[#7a5646] shadow-md ring-2 ring-[#7a5646]/30 scale-[1.02]'
+                        : 'bg-card border-[#d4c3bc]/60 hover:bg-[#e8ded8] hover:border-[#7a5646]/40 text-[#1b1c1c]'
+                    }`}
+                  >
+                    {/* Badge Today / Tomorrow */}
+                    {item.isToday && (
+                      <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full mb-0.5 ${
+                        isSelected ? 'bg-amber-300 text-amber-950' : 'bg-amber-100 text-amber-900 border border-amber-200'
+                      }`}>
+                        วันนี้
+                      </span>
+                    )}
+                    {item.isTomorrow && (
+                      <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded-full mb-0.5 ${
+                        isSelected ? 'bg-white/20 text-white' : 'bg-[#7a5646]/10 text-[#7a5646]'
+                      }`}>
+                        พรุ่งนี้
+                      </span>
+                    )}
+                    {!item.isToday && !item.isTomorrow && (
+                      <span className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
+                        {item.monthName}
+                      </span>
+                    )}
+
+                    <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-[#636260]'}`}>
+                      {item.dayName}
+                    </span>
+
+                    <span className={`text-lg sm:text-xl font-bold font-serif my-0.5 ${
+                      isSelected ? 'text-white' : 'text-[#1b1c1c]'
+                    }`}>
+                      {item.dayNumber}
+                    </span>
+
+                    {(item.isToday || item.isTomorrow) && (
+                      <span className={`text-[9px] ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
+                        {item.monthName}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Date Summary Display */}
+            <div className="p-2.5 bg-[#f5f0ea] rounded-xl flex items-center justify-between text-xs border border-[#d4c3bc]/50 text-[#1b1c1c]">
+              <div className="flex items-center gap-2">
+                <span className="text-[#636260]">วันที่เลือก:</span>
+                <span className="font-bold text-[#7a5646]">
+                  {formatThaiDateDisplay(selectedDate)}
+                </span>
+              </div>
+              <Badge variant="outline" className="text-[10px] border-[#7a5646]/40 text-[#7a5646] bg-card">
+                ยืนยันวันแล้ว
+              </Badge>
+            </div>
+          </div>
+
+          {/* 2. Stylist Selector */}
           <div className="bg-[#fcf9f8] p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm">
             <h3 className="font-serif text-lg font-bold text-[#1b1c1c] mb-1">
               เลือกช่างประจำการจอง (Select Stylist)
@@ -442,21 +615,6 @@ export function ServicesPage() {
                 );
               })}
             </div>
-          </div>
-
-          {/* Date Picker */}
-          <div className="bg-[#fcf9f8] p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm">
-            <h3 className="font-serif text-lg font-bold text-[#1b1c1c] mb-1">
-              เลือกวันที่นัดหมาย (Select Date)
-            </h3>
-            <p className="text-xs text-[#636260] mb-3">เลือกรอบวันที่สะดวกเข้ามารับบริการ</p>
-            <Input
-              type="date"
-              value={selectedDate}
-              min={new Date().toISOString().split('T')[0]}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-card border-[#d4c3bc] rounded-xl text-sm h-11"
-            />
           </div>
 
           {/* Time Slots */}
