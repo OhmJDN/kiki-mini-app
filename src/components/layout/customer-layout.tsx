@@ -13,11 +13,14 @@ import {
   LogIn,
   Globe,
   Smartphone,
-  X
+  X,
+  Tag,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { KikiLogo } from '@/components/common/kiki-logo';
 import { useLanguageStore } from '@/stores/language-store';
+import { CustomerOnboardingModal } from '@/components/common/customer-onboarding-modal';
 
 export function CustomerLayout() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -26,6 +29,7 @@ export function CustomerLayout() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [dismissBanner, setDismissBanner] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const isLineClient = isInLineApp();
 
   useEffect(() => {
@@ -37,6 +41,13 @@ export function CustomerLayout() {
     }
   }, [isLineClient]);
 
+  // Check if user is logged in for the first time without customer_type set
+  useEffect(() => {
+    if (isAuthenticated && user && !user.customer_type) {
+      setShowOnboarding(true);
+    }
+  }, [isAuthenticated, user?.customer_type]);
+
   const handleLogin = async () => {
     if (isLineClient) {
       await authenticateWithLine(true);
@@ -47,8 +58,10 @@ export function CustomerLayout() {
 
   const navItems = [
     { name: t('home'), path: '/', icon: Home },
+    { name: t('promotions'), path: '/promotions', icon: Tag },
     { name: t('allServices'), path: '/services', icon: Scissors },
     { name: t('myBookings'), path: '/bookings', icon: Calendar },
+    { name: t('profile'), path: '/profile', icon: User },
   ];
 
   return (
@@ -163,6 +176,24 @@ export function CustomerLayout() {
 
                     <div className="py-1">
                       <Link
+                        to="/profile"
+                        onClick={() => setMenuOpen(false)}
+                        className="w-full px-4 py-2 text-left text-xs text-[#7a5646] hover:bg-[#f5f0ea] flex items-center gap-2 font-medium"
+                      >
+                        <User className="w-3.5 h-3.5" />
+                        {t('profile')}
+                      </Link>
+
+                      <Link
+                        to="/promotions"
+                        onClick={() => setMenuOpen(false)}
+                        className="w-full px-4 py-2 text-left text-xs text-[#7a5646] hover:bg-[#f5f0ea] flex items-center gap-2 font-medium"
+                      >
+                        <Tag className="w-3.5 h-3.5" />
+                        {t('promotions')}
+                      </Link>
+
+                      <Link
                         to="/bookings"
                         onClick={() => setMenuOpen(false)}
                         className="w-full px-4 py-2 text-left text-xs text-[#7a5646] hover:bg-[#f5f0ea] flex items-center gap-2 font-medium"
@@ -220,7 +251,7 @@ export function CustomerLayout() {
 
       {/* Bottom Navigation for Mobile Devices */}
       <nav className="fixed bottom-0 left-0 z-40 w-full h-16 border-t border-[#d4c3bc]/60 bg-[#f5f0ea]/95 backdrop-blur-lg sm:hidden shadow-lg">
-        <div className="grid h-full grid-cols-3 max-w-md mx-auto">
+        <div className="grid h-full grid-cols-5 max-w-md mx-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -233,14 +264,20 @@ export function CustomerLayout() {
                 }`}
               >
                 <div className={`p-1 rounded-full ${isActive ? 'bg-[#7a5646]/10' : ''}`}>
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] mt-0.5">{item.name}</span>
+                <span className="text-[9px] mt-0.5 truncate max-w-[56px] text-center leading-tight">{item.name}</span>
               </Link>
             );
           })}
         </div>
       </nav>
+
+      {/* Customer First-Time Login Onboarding Modal */}
+      <CustomerOnboardingModal
+        isOpen={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
+      />
 
       <Toaster />
     </div>

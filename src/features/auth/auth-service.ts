@@ -82,6 +82,7 @@ export const authenticateWithLine = async (force: boolean = false): Promise<Prof
         picture_url: lineProfile.pictureUrl || null,
         phone: user?.phone || null,
         role: 'customer',
+        customer_type: user?.customer_type,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

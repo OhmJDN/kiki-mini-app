@@ -7,7 +7,8 @@ import type {
   BookingStatus,
   DepositStatus,
   Branch, 
-  Stylist 
+  Stylist,
+  Promotion
 } from '../types';
 import { DEMO_CUSTOMER } from '../features/auth/auth-service';
 
@@ -97,11 +98,11 @@ export const INITIAL_STYLISTS: Stylist[] = [
     id: 'st-004',
     branch_id: 'b-downtown',
     name: 'Sarah Jenkins (ช่างซาร่าห์)',
-    title: 'Nail & Wellness Therapist',
+    title: 'Nail Master & Hand Spa Therapist',
     avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80',
     rating: 4.97,
     review_count: 280,
-    specialties: ['nails', 'spa'],
+    specialties: ['nails'],
     working_days: [1, 3, 4, 5, 6, 0],
     off_dates: [],
     is_active: true,
@@ -110,7 +111,7 @@ export const INITIAL_STYLISTS: Stylist[] = [
   },
   {
     id: 'st-005',
-    branch_id: 'b-bangna',
+    branch_id: 'b-downtown',
     name: 'Mayura K. (ช่างมายูระ)',
     title: 'Skin Aesthetics & Facial Specialist',
     avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&auto=format&fit=crop&q=80',
@@ -118,6 +119,81 @@ export const INITIAL_STYLISTS: Stylist[] = [
     review_count: 160,
     specialties: ['skincare', 'makeup'],
     working_days: [1, 2, 3, 5, 6, 0],
+    off_dates: [],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'st-006',
+    branch_id: 'b-downtown',
+    name: 'Aom Nattaporn (ช่างอ้อม)',
+    title: 'Head Spa & Aromatherapy Master',
+    avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&auto=format&fit=crop&q=80',
+    rating: 4.96,
+    review_count: 210,
+    specialties: ['spa'],
+    working_days: [1, 2, 3, 4, 5, 6],
+    off_dates: [],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'st-007',
+    branch_id: 'b-siam',
+    name: 'Jessica Liu (ช่างเจสสิก้า)',
+    title: 'Nail Couture & Russian Manicure Specialist',
+    avatar_url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&auto=format&fit=crop&q=80',
+    rating: 4.91,
+    review_count: 175,
+    specialties: ['nails'],
+    working_days: [2, 3, 4, 5, 6, 0],
+    off_dates: [],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'st-008',
+    branch_id: 'b-siam',
+    name: 'Praew Panisara (ช่างแพรว)',
+    title: 'Scalp Health & Organic Head Spa Specialist',
+    avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&auto=format&fit=crop&q=80',
+    rating: 4.94,
+    review_count: 140,
+    specialties: ['spa', 'skincare'],
+    working_days: [1, 2, 3, 4, 5, 0],
+    off_dates: [],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'st-009',
+    branch_id: 'b-bangna',
+    name: 'Benz Thitirat (ช่างเบนซ์)',
+    title: 'Senior Hair Artist & Balayage Colorist',
+    avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&auto=format&fit=crop&q=80',
+    rating: 4.89,
+    review_count: 185,
+    specialties: ['hair'],
+    working_days: [1, 2, 3, 4, 5, 6],
+    off_dates: [],
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'st-010',
+    branch_id: 'b-bangna',
+    name: 'Linlada B. (ช่างหลินลดา)',
+    title: 'Nail Art & Spa Wellness Therapist',
+    avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&auto=format&fit=crop&q=80',
+    rating: 4.93,
+    review_count: 165,
+    specialties: ['nails', 'spa'],
+    working_days: [1, 3, 4, 5, 6, 0],
     off_dates: [],
     is_active: true,
     created_at: new Date().toISOString(),
@@ -263,11 +339,90 @@ const INITIAL_BOOKINGS: BookingWithRelations[] = [
   },
 ];
 
+export const INITIAL_PROMOTIONS: Promotion[] = [
+  {
+    id: 'promo-001',
+    title: 'KIKI Exclusive October Glow: Signature Balayage & Hair Spa',
+    description: 'โปรโมชั่นสุดพิเศษประจำเดือนตุลาคม ทำสีพรีเมียม Balayage หรือ AirTouch คู่กับ Signature Head Spa รับส่วนลดทันที 25% พร้อมรับฟรีกิ๊ฟเซ็ตเคราตินนำเข้าจากญี่ปุ่น',
+    discount_text: 'ลด 25% พิเศษเฉพาะเดือนนี้',
+    image_url: 'https://kikibeautyspace.com/wp-content/uploads/2025/01/2.jpg',
+    banner_url: 'https://kikibeautyspace.com/wp-content/uploads/2025/01/photos-nng-07-scaled-2.jpg',
+    month: 'ตุลาคม 2569 (October 2026)',
+    valid_until: '2026-10-31',
+    service_ids: ['s-002', 's-006'],
+    badge: '🔥 Monthly Highlight',
+    is_active: true,
+    terms: [
+      'จำกัด 30 สิทธิ์ต่อสาขาเท่านั้น',
+      'ต้องจองล่วงหน้าผ่าน LINE Mini App',
+      'ไม่สามารถใช้ร่วมกับคูปองส่วนลดอื่นๆ ได้'
+    ],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'promo-002',
+    title: 'Autumn Elegance: Gel Nail Art & Luxury Hand Spa',
+    description: 'ตกแต่งเล็บเจลสไตล์ลูกคุณหนู อะไหล่เพชรสวารอฟสกี้ไม่อั้น พร้อมสครับและมาส์กพาราฟินบำรุงล้ำลึก ในราคาพิเศษเพียง ฿1,290 (จากปกติ ฿1,800)',
+    discount_text: 'แพ็กเกจพิเศษ ฿1,290',
+    image_url: 'https://kikibeautyspace.com/wp-content/uploads/2025/01/4.jpg',
+    banner_url: 'https://kikibeautyspace.com/wp-content/uploads/2025/01/photos-nng-08-scaled-1-1.jpg',
+    month: 'ตุลาคม 2569 (October 2026)',
+    valid_until: '2026-10-31',
+    service_ids: ['s-004'],
+    badge: '✨ Best Seller',
+    is_active: true,
+    terms: [
+      'รวมค่าถอดสีเจลเดิมฟรี',
+      'สามารถนำแบบลายมาให้ช่างดีไซน์ได้'
+    ],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'promo-003',
+    title: 'New Customer Welcome: ออกแบบทรงผม Master Cut & Detox',
+    description: 'สำหรับลูกค้าใหม่ที่จองคิวครั้งแรก รับสิทธิ์สัมผัสประสบการณ์ Signature Haircut โดย Director Stylist พร้อม Scalp Detox ในราคาพิเศษลดทันที 300 บาท',
+    discount_text: 'ลูกค้าใหม่ ลดทันที ฿300',
+    image_url: 'https://kikibeautyspace.com/wp-content/uploads/2025/01/1.jpg',
+    banner_url: 'https://kikibeautyspace.com/wp-content/uploads/2025/01/Contact-forms-855-x-771-px.jpg',
+    month: 'ตุลาคม 2569 (October 2026)',
+    valid_until: '2026-10-31',
+    service_ids: ['s-001'],
+    badge: '🎁 ต้อนรับลูกค้าใหม่',
+    is_active: true,
+    terms: [
+      'เฉพาะลูกค้าที่ไม่เคยมีประวัติรับบริการที่ร้านมาก่อน',
+      'สิทธิ์ 1 ท่าน / 1 ครั้ง'
+    ],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
 // Local Storage Keys
 const STORAGE_SERVICES_KEY = 'kiki_salon_services';
 const STORAGE_BOOKINGS_KEY = 'kiki_salon_bookings';
 const STORAGE_BRANCHES_KEY = 'kiki_salon_branches';
 const STORAGE_STYLISTS_KEY = 'kiki_salon_stylists';
+const STORAGE_PROMOTIONS_KEY = 'kiki_salon_promotions';
+
+const getStoredPromotions = (): Promotion[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_PROMOTIONS_KEY);
+    if (!raw) {
+      localStorage.setItem(STORAGE_PROMOTIONS_KEY, JSON.stringify(INITIAL_PROMOTIONS));
+      return INITIAL_PROMOTIONS;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return INITIAL_PROMOTIONS;
+  }
+};
+
+const saveStoredPromotions = (promotions: Promotion[]) => {
+  localStorage.setItem(STORAGE_PROMOTIONS_KEY, JSON.stringify(promotions));
+};
 
 const getStoredBranches = (): Branch[] => {
   try {
@@ -715,6 +870,12 @@ export const salonService = {
     const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
     const depositAmount = bookingData.depositAmount ?? selectedServices.reduce((max, s) => Math.max(max, s.deposit_amount), 0);
 
+    const hasSlip = Boolean(bookingData.slipUrl);
+    const initialDepositStatus: DepositStatus = bookingData.depositStatus || (
+      hasSlip ? 'verified' : (depositAmount > 0 ? 'pending_verification' : 'none')
+    );
+    const initialStatus: BookingStatus = (hasSlip || depositAmount === 0) ? 'confirmed' : 'pending';
+
     const newBooking: BookingWithRelations = {
       id: 'b-' + Date.now(),
       customer_id: bookingData.customerId,
@@ -727,9 +888,9 @@ export const salonService = {
       total_duration_minutes: totalDuration,
       total_price: totalPrice,
       deposit_amount: depositAmount,
-      deposit_status: bookingData.depositStatus || (depositAmount > 0 ? 'pending_verification' : 'none'),
+      deposit_status: initialDepositStatus,
       slip_url: bookingData.slipUrl || null,
-      status: 'pending',
+      status: initialStatus,
       note: bookingData.note || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -916,5 +1077,115 @@ export const salonService = {
       branchesCount: branches.length,
       recentBookings: bookings.slice(0, 6),
     };
+  },
+
+  // ================= PROMOTIONS =================
+  async getPromotions(): Promise<Promotion[]> {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await (supabase.from('promotions') as any)
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          return data as Promotion[];
+        }
+      } catch (e) {
+        console.warn('Supabase getPromotions error, using local data:', e);
+      }
+    }
+    return getStoredPromotions();
+  },
+
+  async createPromotion(data: Omit<Promotion, 'id' | 'created_at' | 'updated_at'>): Promise<Promotion> {
+    const newPromo: Promotion = {
+      ...data,
+      id: 'promo-' + Date.now(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    if (isSupabaseConfigured) {
+      try {
+        const { data: inserted, error } = await (supabase.from('promotions') as any)
+          .insert(newPromo)
+          .select()
+          .single();
+        if (!error && inserted) {
+          return inserted as Promotion;
+        }
+      } catch (e) {
+        console.warn('Supabase createPromotion error:', e);
+      }
+    }
+
+    const promos = [newPromo, ...getStoredPromotions()];
+    saveStoredPromotions(promos);
+    return newPromo;
+  },
+
+  async updatePromotion(id: string, updates: Partial<Promotion>): Promise<Promotion | null> {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await (supabase.from('promotions') as any)
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) {
+          return data as Promotion;
+        }
+      } catch (e) {
+        console.warn('Supabase updatePromotion error:', e);
+      }
+    }
+
+    const promos = getStoredPromotions();
+    const index = promos.findIndex((p) => p.id === id);
+    if (index === -1) return null;
+    promos[index] = { ...promos[index], ...updates, updated_at: new Date().toISOString() };
+    saveStoredPromotions(promos);
+    return promos[index];
+  },
+
+  async deletePromotion(id: string): Promise<boolean> {
+    if (isSupabaseConfigured) {
+      try {
+        await (supabase.from('promotions') as any).delete().eq('id', id);
+      } catch (e) {
+        console.warn('Supabase deletePromotion error:', e);
+      }
+    }
+    const promos = getStoredPromotions().filter((p) => p.id !== id);
+    saveStoredPromotions(promos);
+    return true;
+  },
+
+  // ================= PROFILE UPDATES =================
+  async updateCustomerProfile(id: string, updates: Partial<Profile>): Promise<Profile | null> {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await (supabase.from('profiles') as any)
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) {
+          return data as Profile;
+        }
+      } catch (e) {
+        console.warn('Supabase updateCustomerProfile error:', e);
+      }
+    }
+
+    // Also update any customer in local bookings
+    const bookings = getStoredBookings();
+    bookings.forEach((b) => {
+      if (b.customer_id === id && b.customer) {
+        b.customer = { ...b.customer, ...updates, updated_at: new Date().toISOString() };
+      }
+    });
+    saveStoredBookings(bookings);
+
+    return null;
   },
 };

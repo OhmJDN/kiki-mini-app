@@ -12,7 +12,8 @@ import {
   LogOut, 
   MapPin, 
   UserCheck, 
-  Lock
+  Lock,
+  Tag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { KikiLogo } from '@/components/common/kiki-logo';
@@ -96,6 +97,7 @@ export function AdminLayout() {
   const navItems = [
     { name: 'ภาพรวมร้าน', path: '/admin', icon: LayoutDashboard },
     { name: 'การจอง & สลิป', path: '/admin/bookings', icon: Calendar },
+    { name: 'จัดการโปรโมชั่น', path: '/admin/promotions', icon: Tag },
     { name: 'จัดการบริการ', path: '/admin/services', icon: Scissors },
     { name: 'ช่าง & ตารางงาน', path: '/admin/stylists', icon: UserCheck },
     { name: 'จัดการสาขา', path: '/admin/branches', icon: MapPin },
@@ -199,7 +201,7 @@ export function AdminLayout() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden border-t border-[#d4c3bc]/60 bg-card sticky bottom-0 z-30 shadow-lg">
-        <div className="grid grid-cols-6 h-16 px-1">
+        <div className="grid grid-cols-7 h-16 px-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;

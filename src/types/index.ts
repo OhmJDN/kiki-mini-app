@@ -6,6 +6,8 @@ export type DepositStatus = 'none' | 'pending_verification' | 'verified' | 'reje
 
 export type ServiceCategory = 'hair' | 'nails' | 'spa' | 'makeup' | 'skincare';
 
+export type CustomerType = 'new' | 'existing';
+
 export interface Profile {
   id: string;
   line_user_id: string;
@@ -13,6 +15,26 @@ export interface Profile {
   picture_url: string | null;
   phone: string | null;
   role: UserRole;
+  customer_type?: CustomerType;
+  birthday?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Promotion {
+  id: string;
+  title: string;
+  description: string;
+  discount_text: string; // e.g. "ลด 20%" or "เริ่มต้น ฿1,990"
+  image_url: string;
+  banner_url?: string;
+  month: string; // e.g. "ตุลาคม 2569" or "October 2026"
+  valid_until: string; // e.g. "2026-10-31"
+  service_ids?: string[]; // IDs of services related
+  badge?: string; // e.g. "Hot Deal", "Exclusive", "Monthly Highlight"
+  is_active: boolean;
+  terms?: string[];
   created_at: string;
   updated_at: string;
 }

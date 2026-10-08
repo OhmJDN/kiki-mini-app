@@ -127,13 +127,18 @@ export function AdminCustomersPage() {
                       {c.line_user_id}
                     </td>
 
-                    <td className="py-3.5 px-4">
-                      {c.role === 'admin' ? (
-                        <Badge className="bg-[#7a5646] text-white text-[10px]">ผู้ดูแลระบบ</Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-[#7a5646]/40 text-[#7a5646] text-[10px]">
-                          ลูกค้าทั่วไป
+                    <td className="py-3.5 px-4 space-y-1">
+                      {c.customer_type === 'existing' ? (
+                        <Badge className="bg-[#7a5646] text-white text-[10px] block w-fit">
+                          ลูกค้าประจำ (VIP)
                         </Badge>
+                      ) : (
+                        <Badge className="bg-amber-100 text-amber-900 border-amber-300 text-[10px] block w-fit">
+                          ลูกค้าใหม่ (New)
+                        </Badge>
+                      )}
+                      {c.role === 'admin' && (
+                        <Badge className="bg-gray-800 text-white text-[9px] block w-fit">ผู้ดูแลระบบ</Badge>
                       )}
                     </td>
 

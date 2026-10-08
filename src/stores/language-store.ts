@@ -8,8 +8,10 @@ export const TRANSLATIONS = {
   th: {
     // Navigation
     home: 'หน้าแรก',
+    promotions: 'โปรโมชั่น',
     allServices: 'บริการทั้งหมด',
     myBookings: 'การจองของฉัน',
+    profile: 'โปรไฟล์ของฉัน',
     adminPortal: 'ระบบจัดการหลังบ้าน',
     login: 'เข้าสู่ระบบ LINE',
     logout: 'ออกจากระบบ',
@@ -133,8 +135,10 @@ export const TRANSLATIONS = {
   en: {
     // Navigation
     home: 'Home',
+    promotions: 'Promotions',
     allServices: 'Services',
     myBookings: 'My Bookings',
+    profile: 'My Profile',
     adminPortal: 'Admin Portal',
     login: 'Login with LINE',
     logout: 'Logout',

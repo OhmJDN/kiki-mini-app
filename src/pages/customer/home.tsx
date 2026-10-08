@@ -6,7 +6,7 @@ import type { Service, BookingWithRelations, Branch } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Scissors, ChevronRight, Clock, Sparkles, MapPin, Phone } from 'lucide-react';
+import { Calendar, Scissors, ChevronRight, Clock, Sparkles, MapPin, Phone, User, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { KikiLogo } from '@/components/common/kiki-logo';
 
@@ -16,18 +16,21 @@ export function Home() {
   const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [upcomingBooking, setUpcomingBooking] = useState<BookingWithRelations | null>(null);
+  const [activePromosCount, setActivePromosCount] = useState(0);
 
   useEffect(() => {
     loadHomeData();
   }, [user?.id]);
 
   const loadHomeData = async () => {
-    const [services, branchList] = await Promise.all([
+    const [services, branchList, promos] = await Promise.all([
       salonService.getServices(),
       salonService.getBranches(),
+      salonService.getPromotions(),
     ]);
     setFeaturedServices(services.slice(0, 4));
     setBranches(branchList.filter((b) => b.is_active));
+    setActivePromosCount(promos.filter((p) => p.is_active).length);
 
     if (user) {
       const bookings = await salonService.getBookings({ customerId: user.id });
@@ -102,17 +105,35 @@ export function Home() {
         </Card>
       )}
 
-      {/* Quick Action Navigation */}
-      <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
-        <Link to="/services" className="group">
-          <Card className="hover:border-[#7a5646]/60 hover:shadow-md transition-all bg-card h-full border-[#d4c3bc]/60 rounded-2xl overflow-hidden">
-            <CardContent className="flex flex-col items-center justify-center p-5 sm:p-6 text-center gap-2.5">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#7a5646]/10 group-hover:bg-[#7a5646]/20 transition-colors flex items-center justify-center text-[#7a5646]">
-                <Scissors className="w-6 h-6 sm:w-7 sm:h-7" />
+      {/* Quick Action Navigation Grid (4 Highlights) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Link to="/promotions" className="group">
+          <Card className="hover:border-[#7a5646]/60 hover:shadow-md transition-all bg-card h-full border-[#d4c3bc]/60 rounded-2xl overflow-hidden relative">
+            <CardContent className="flex flex-col items-center justify-center p-4 text-center gap-2">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors flex items-center justify-center text-amber-700">
+                <Flame className="w-5 h-5 fill-current" />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-sm sm:text-base text-[#1b1c1c]">{t('ourServicesTitle')}</h3>
-                <p className="text-[11px] sm:text-xs text-[#636260] mt-0.5">{t('ourServicesSub')}</p>
+                <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1b1c1c]">
+                  {language === 'th' ? 'โปรโมชั่น' : 'Promotions'}
+                </h3>
+                <p className="text-[10px] text-[#7a5646] font-medium mt-0.5">
+                  {language === 'th' ? `${activePromosCount} ดีลพิเศษ` : `${activePromosCount} Hot Deals`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link to="/services" className="group">
+          <Card className="hover:border-[#7a5646]/60 hover:shadow-md transition-all bg-card h-full border-[#d4c3bc]/60 rounded-2xl overflow-hidden">
+            <CardContent className="flex flex-col items-center justify-center p-4 text-center gap-2">
+              <div className="w-11 h-11 rounded-2xl bg-[#7a5646]/10 group-hover:bg-[#7a5646]/20 transition-colors flex items-center justify-center text-[#7a5646]">
+                <Scissors className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1b1c1c]">{t('ourServicesTitle')}</h3>
+                <p className="text-[10px] text-[#636260] mt-0.5">{t('ourServicesSub')}</p>
               </div>
             </CardContent>
           </Card>
@@ -120,13 +141,33 @@ export function Home() {
 
         <Link to="/bookings" className="group">
           <Card className="hover:border-[#7a5646]/60 hover:shadow-md transition-all bg-card h-full border-[#d4c3bc]/60 rounded-2xl overflow-hidden">
-            <CardContent className="flex flex-col items-center justify-center p-5 sm:p-6 text-center gap-2.5">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#7a5646]/10 group-hover:bg-[#7a5646]/20 transition-colors flex items-center justify-center text-[#7a5646]">
-                <Calendar className="w-6 h-6 sm:w-7 sm:h-7" />
+            <CardContent className="flex flex-col items-center justify-center p-4 text-center gap-2">
+              <div className="w-11 h-11 rounded-2xl bg-[#7a5646]/10 group-hover:bg-[#7a5646]/20 transition-colors flex items-center justify-center text-[#7a5646]">
+                <Calendar className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-sm sm:text-base text-[#1b1c1c]">{t('myBookingsCardTitle')}</h3>
-                <p className="text-[11px] sm:text-xs text-[#636260] mt-0.5">{t('myBookingsCardSub')}</p>
+                <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1b1c1c]">{t('myBookingsCardTitle')}</h3>
+                <p className="text-[10px] text-[#636260] mt-0.5">{t('myBookingsCardSub')}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link to="/profile" className="group">
+          <Card className="hover:border-[#7a5646]/60 hover:shadow-md transition-all bg-card h-full border-[#d4c3bc]/60 rounded-2xl overflow-hidden">
+            <CardContent className="flex flex-col items-center justify-center p-4 text-center gap-2">
+              <div className="w-11 h-11 rounded-2xl bg-[#7a5646]/10 group-hover:bg-[#7a5646]/20 transition-colors flex items-center justify-center text-[#7a5646]">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-serif font-bold text-xs sm:text-sm text-[#1b1c1c]">
+                  {language === 'th' ? 'โปรไฟล์' : 'My Profile'}
+                </h3>
+                <p className="text-[10px] text-[#636260] mt-0.5">
+                  {user?.customer_type === 'existing'
+                    ? (language === 'th' ? 'ลูกค้าประจำ' : 'VIP Member')
+                    : (language === 'th' ? 'ลูกค้าใหม่' : 'New Guest')}
+                </p>
               </div>
             </CardContent>
           </Card>

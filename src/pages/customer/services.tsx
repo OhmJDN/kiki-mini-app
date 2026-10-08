@@ -63,8 +63,13 @@ function formatLocalizedDateDisplay(dateStr: string, language: 'th' | 'en'): str
   }
 }
 
-const MORNING_SLOTS = ['09:30', '10:30', '11:30'];
-const AFTERNOON_SLOTS = ['13:00', '14:30', '16:00', '17:30', '18:30', '19:30'];
+// Slots from 10:00 to 20:00 every 30 minutes
+export const TIME_SLOTS_30MIN = [
+  '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+  '19:00', '19:30', '20:00'
+];
 
 export function ServicesPage() {
   const navigate = useNavigate();
@@ -174,6 +179,8 @@ export function ServicesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const [existingBookings, setExistingBookings] = useState<any[]>([]);
+
   useEffect(() => {
     loadInitialData();
   }, []);
@@ -181,14 +188,16 @@ export function ServicesPage() {
   const loadInitialData = async () => {
     setIsLoading(true);
     try {
-      const [brData, stData, srvData] = await Promise.all([
+      const [brData, stData, srvData, allBookings] = await Promise.all([
         salonService.getBranches(),
         salonService.getStylists(),
         salonService.getServices(),
+        salonService.getBookings(),
       ]);
       setBranches(brData);
       setStylists(stData);
       setServices(srvData);
+      setExistingBookings(allBookings);
 
       if (brData.length > 0) {
         setSelectedBranchId(brData[0].id);
@@ -222,7 +231,17 @@ export function ServicesPage() {
   const depositAmount = selectedServices.reduce((max, s) => Math.max(max, s.deposit_amount), 0);
 
   const selectedBranch = branches.find((b) => b.id === selectedBranchId) || branches[0];
-  const availableStylists = stylists.filter((s) => s.branch_id === selectedBranchId && s.is_active);
+
+  // Stylists filtered specifically by the categories of selected services!
+  const selectedCategories = Array.from(new Set(selectedServices.map((s) => s.category)));
+  const availableStylists = stylists.filter((s) => {
+    if (s.branch_id !== selectedBranchId || !s.is_active) return false;
+    // If services selected, stylist must specialize in at least one selected category
+    if (selectedCategories.length > 0) {
+      return s.specialties.some((spec) => selectedCategories.includes(spec));
+    }
+    return true;
+  });
   const selectedStylist = stylists.find((s) => s.id === selectedStylistId);
 
   // Submit Booking
@@ -265,7 +284,7 @@ export function ServicesPage() {
         bookingDate: selectedDate,
         bookingTime: selectedTime,
         depositAmount: depositRequired ? depositAmount : 0,
-        depositStatus: depositRequired ? 'pending_verification' : 'none',
+        depositStatus: depositRequired ? (slipUrl ? 'verified' : 'pending_verification') : 'none',
         slipUrl,
         note: bookingNote ? `${bookingNote} (Tel: ${customerPhone})` : `(Tel: ${customerPhone})`,
       });
@@ -636,48 +655,67 @@ export function ServicesPage() {
             </div>
           </div>
 
-          {/* Time Slots */}
+          {/* Time Slots (10:00 - 20:00 every 30 minutes, max 2 clients per slot) */}
           <div className="bg-[#fcf9f8] p-5 rounded-2xl border border-[#d4c3bc]/60 shadow-sm space-y-4">
-            <h3 className="font-serif text-lg font-bold text-[#1b1c1c]">
-              {t('selectTimeTitle')}
-            </h3>
-
-            <div>
-              <p className="text-xs font-semibold text-[#636260] uppercase tracking-wider mb-2">{t('morning')}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {MORNING_SLOTS.map((slot) => (
-                  <button
-                    key={slot}
-                    onClick={() => setSelectedTime(slot)}
-                    className={`py-2.5 text-xs rounded-xl font-medium border transition-all ${
-                      selectedTime === slot
-                        ? 'bg-[#7a5646] text-white border-[#7a5646] shadow-sm'
-                        : 'bg-card border-[#d4c3bc]/60 text-[#1b1c1c] hover:bg-[#e8ded8]'
-                    }`}
-                  >
-                    {slot} {t('minsShort')}
-                  </button>
-                ))}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[#1b1c1c]">
+                  {t('selectTimeTitle')} (10:00 - 20:00 น.)
+                </h3>
+                <p className="text-xs text-[#636260]">
+                  {language === 'th'
+                    ? 'แสดงรอบเวลาทุก 30 นาที (จำกัดรับบริการสูงสุดรอบละ 2 ท่าน)'
+                    : '30-minute intervals (Max capacity: 2 guests per slot)'}
+                </p>
               </div>
+              <Badge variant="outline" className="text-[10px] text-[#7a5646] border-[#7a5646]/40 self-start sm:self-auto">
+                ⚡ รอบละ 30 นาที
+              </Badge>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold text-[#636260] uppercase tracking-wider mb-2">{t('afternoon')}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {AFTERNOON_SLOTS.map((slot) => (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2.5 pt-1">
+              {TIME_SLOTS_30MIN.map((slot) => {
+                // Count active bookings at this branch & date & slot
+                const slotBookings = existingBookings.filter(
+                  (b) =>
+                    b.booking_date === selectedDate &&
+                    b.booking_time === slot &&
+                    b.branch_id === selectedBranchId &&
+                    b.status !== 'cancelled'
+                );
+                const bookedCount = slotBookings.length;
+                const isFull = bookedCount >= 2;
+                const isSelected = selectedTime === slot;
+                const remaining = Math.max(0, 2 - bookedCount);
+
+                return (
                   <button
                     key={slot}
+                    disabled={isFull}
                     onClick={() => setSelectedTime(slot)}
-                    className={`py-2.5 text-xs rounded-xl font-medium border transition-all ${
-                      selectedTime === slot
-                        ? 'bg-[#7a5646] text-white border-[#7a5646] shadow-sm'
-                        : 'bg-card border-[#d4c3bc]/60 text-[#1b1c1c] hover:bg-[#e8ded8]'
+                    className={`py-3 px-2 rounded-xl border flex flex-col items-center justify-center transition-all relative ${
+                      isFull
+                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-60'
+                        : isSelected
+                        ? 'bg-[#7a5646] text-white border-[#7a5646] shadow-md ring-2 ring-[#7a5646]/20'
+                        : 'bg-card border-[#d4c3bc]/60 text-[#1b1c1c] hover:bg-[#e8ded8] hover:border-[#7a5646]/40'
                     }`}
                   >
-                    {slot} {t('minsShort')}
+                    <span className="font-bold text-xs">{slot} {t('minsShort')}</span>
+                    <span
+                      className={`text-[9px] mt-0.5 leading-none ${
+                        isFull
+                          ? 'text-rose-500 font-semibold'
+                          : isSelected
+                          ? 'text-amber-200'
+                          : 'text-[#636260]'
+                      }`}
+                    >
+                      {isFull ? (language === 'th' ? 'เต็ม (2/2)' : 'Full') : (language === 'th' ? `ว่าง ${remaining} ที่` : `${remaining} left`)}
+                    </span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>

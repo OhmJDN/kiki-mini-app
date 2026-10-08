@@ -9,9 +9,12 @@ import { AdminLayout } from './components/layout/admin-layout';
 import { Home } from './pages/customer/home';
 import { ServicesPage } from './pages/customer/services';
 import { BookingsPage } from './pages/customer/bookings';
+import { PromotionsPage } from './pages/customer/promotions';
+import { CustomerProfilePage } from './pages/customer/profile';
 
 import { AdminDashboard } from './pages/admin/dashboard';
 import { AdminBookingsPage } from './pages/admin/bookings';
+import { AdminPromotionsPage } from './pages/admin/promotions';
 import { AdminServicesPage } from './pages/admin/services';
 import { AdminStylistsPage } from './pages/admin/stylists';
 import { AdminBranchesPage } from './pages/admin/branches';
@@ -39,19 +42,24 @@ function App() {
           {/* Customer Routes (Direct Root for LINE Mini App) */}
           <Route path="/" element={<CustomerLayout />}>
             <Route index element={<Home />} />
+            <Route path="promotions" element={<PromotionsPage />} />
             <Route path="services" element={<ServicesPage />} />
             <Route path="bookings" element={<BookingsPage />} />
+            <Route path="profile" element={<CustomerProfilePage />} />
           </Route>
 
           {/* Legacy / Alias Redirects */}
           <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/home/promotions" element={<Navigate to="/promotions" replace />} />
           <Route path="/home/services" element={<Navigate to="/services" replace />} />
           <Route path="/home/bookings" element={<Navigate to="/bookings" replace />} />
+          <Route path="/home/profile" element={<Navigate to="/profile" replace />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookingsPage />} />
+            <Route path="promotions" element={<AdminPromotionsPage />} />
             <Route path="services" element={<AdminServicesPage />} />
             <Route path="stylists" element={<AdminStylistsPage />} />
             <Route path="branches" element={<AdminBranchesPage />} />
