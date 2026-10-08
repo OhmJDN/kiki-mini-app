@@ -85,10 +85,12 @@ export const getLiffProfile = async () => {
   }
 };
 
-export const loginWithLine = async (): Promise<void> => {
+export const loginWithLine = async (customRedirectUri?: string): Promise<void> => {
   await initializeLiff();
   if (!liff.isLoggedIn()) {
-    liff.login();
+    // In external browser, ensure redirectUri points to current origin/path cleanly
+    const redirectUri = customRedirectUri || window.location.href;
+    liff.login({ redirectUri });
   }
 };
 
