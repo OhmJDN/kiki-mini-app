@@ -85,10 +85,24 @@ export const getLiffProfile = async () => {
   }
 };
 
+export const getMiniAppUrl = (subPath?: string): string => {
+  const cleanPath = subPath ? (subPath.startsWith('/') ? subPath : `/${subPath}`) : '';
+  return `https://miniapp.line.me/${liffId}${cleanPath}`;
+};
+
+export const openInLineApp = (subPath?: string): void => {
+  window.location.href = getMiniAppUrl(subPath);
+};
+
 export const loginWithLine = async (customRedirectUri?: string): Promise<void> => {
   await initializeLiff();
   if (!liff.isLoggedIn()) {
-    // In external browser, ensure redirectUri points to current origin/path cleanly
+    // For LINE Mini App opened in external browser:
+    // LINE Mini App policy requires running inside LINE client for authentication.
+    if (!isInLineApp()) {
+      window.location.href = getMiniAppUrl();
+      return;
+    }
     const redirectUri = customRedirectUri || window.location.href;
     liff.login({ redirectUri });
   }
