@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { authenticateWithLine } from '@/features/auth/auth-service';
-import { loginWithLine, isInLineApp } from '@/lib/liff';
+import { loginWithLine, isInLineApp, openInLineApp } from '@/lib/liff';
 import { Toaster } from '@/components/ui/toaster';
 import { 
   Home, 
@@ -11,7 +11,9 @@ import {
   LogOut, 
   ChevronDown,
   LogIn,
-  Globe
+  Globe,
+  Smartphone,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { KikiLogo } from '@/components/common/kiki-logo';
@@ -23,18 +25,20 @@ export function CustomerLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dismissBanner, setDismissBanner] = useState(false);
+  const isLineClient = isInLineApp();
 
   useEffect(() => {
     // Automatically synchronize language from LIFF / Line client
     syncLiffLanguage();
     // When inside LINE or if user has demo cache, automatically pull real LINE profile
-    if (isInLineApp() || !user || user.line_user_id?.startsWith('demo_') || user.display_name?.includes('มินตรา')) {
+    if (isLineClient || !user || user.line_user_id?.startsWith('demo_') || user.display_name?.includes('มินตรา')) {
       authenticateWithLine();
     }
-  }, []);
+  }, [isLineClient]);
 
   const handleLogin = async () => {
-    if (isInLineApp()) {
+    if (isLineClient) {
       await authenticateWithLine(true);
     } else {
       await loginWithLine();
@@ -49,6 +53,35 @@ export function CustomerLayout() {
 
   return (
     <div className="min-h-screen bg-[#f5f0ea] text-[#1b1c1c] pb-20 selection:bg-[#7a5646] selection:text-white">
+      {/* Top Banner when opened in External Browser */}
+      {!isLineClient && !dismissBanner && (
+        <div className="bg-[#1b1c1c] text-[#f5f0ea] text-xs px-3 py-2 flex items-center justify-between gap-2 border-b border-[#7a5646]/30 animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <Smartphone className="w-3.5 h-3.5 text-[#06C755] shrink-0" />
+            <span className="truncate text-[11px] sm:text-xs">
+              {language === 'th'
+                ? 'เปิดผ่านแอป LINE เพื่อเข้าสู่ระบบและรับการแจ้งเตือนคิวอัตโนมัติ'
+                : 'Open in LINE app for seamless login and real-time queue alerts'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => openInLineApp(location.pathname)}
+              className="bg-[#06C755] hover:bg-[#05b34c] text-white font-medium text-[10px] sm:text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm transition-transform active:scale-95"
+            >
+              <span>{language === 'th' ? 'เปิดใน LINE' : 'Open in LINE'}</span>
+            </button>
+            <button
+              onClick={() => setDismissBanner(true)}
+              className="text-white/60 hover:text-white p-0.5"
+              aria-label="Dismiss banner"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
       <header className="sticky top-0 z-40 w-full border-b border-[#d4c3bc]/50 bg-[#f5f0ea]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
@@ -170,10 +203,10 @@ export function CustomerLayout() {
               <Button
                 size="sm"
                 onClick={handleLogin}
-                className="bg-[#06C755] hover:bg-[#05b34c] text-white rounded-full text-xs px-3.5 flex items-center gap-1.5 shadow-sm"
+                className="bg-[#06C755] hover:bg-[#05b34c] text-white rounded-full text-xs px-3.5 flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                {t('login')}
+                {!isLineClient && language === 'th' ? 'เปิดใน LINE' : t('login')}
               </Button>
             )}
           </div>

@@ -4,6 +4,7 @@ import { salonService } from '@/services/salon-service';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLanguageStore } from '@/stores/language-store';
 import { authenticateWithLine } from '@/features/auth/auth-service';
+import { isInLineApp, openInLineApp } from '@/lib/liff';
 import type { BookingWithRelations } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,7 +20,9 @@ import {
   Scissors,
   User,
   RefreshCw,
-  X
+  X,
+  Smartphone,
+  LogIn
 } from 'lucide-react';
 
 const TIME_SLOTS = ['10:00', '11:30', '13:00', '14:30', '16:00', '17:30', '18:30'];
@@ -218,6 +221,29 @@ export function BookingsPage() {
           {[1, 2].map((i) => (
             <div key={i} className="h-36 rounded-2xl bg-card animate-pulse border border-[#d4c3bc]/40" />
           ))}
+        </div>
+      ) : (!user && !isInLineApp()) ? (
+        <div className="text-center py-16 bg-card rounded-3xl border border-[#d4c3bc] p-8 space-y-4 shadow-sm max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-full bg-[#06C755]/10 text-[#06C755] mx-auto flex items-center justify-center">
+            <Smartphone className="w-8 h-8" />
+          </div>
+          <div>
+            <h3 className="font-serif text-lg font-bold text-[#1b1c1c]">
+              {language === 'th' ? 'เข้าสู่ระบบผ่าน LINE เพื่อดูรายการจอง' : 'Open in LINE to View Your Bookings'}
+            </h3>
+            <p className="text-xs text-[#636260] mt-1.5 max-w-sm mx-auto leading-relaxed">
+              {language === 'th'
+                ? 'เนื่องจากคุณเปิดผ่านเบราว์เซอร์ กรุณากดปุ่มด้านล่างเพื่อเปิดผ่านแอป LINE และตรวจสอบสถานะคิวของคุณ'
+                : 'Please open via LINE app to authenticate and view your personalized booking records.'}
+            </p>
+          </div>
+          <Button
+            onClick={() => openInLineApp('bookings')}
+            className="bg-[#06C755] hover:bg-[#05b34c] text-white rounded-full px-6 py-5 text-xs font-semibold shadow-md active:scale-95 transition-transform"
+          >
+            <LogIn className="w-4 h-4 mr-1.5" />
+            {language === 'th' ? 'เปิดในแอป LINE' : 'Open in LINE App'}
+          </Button>
         </div>
       ) : currentList.length === 0 ? (
         <div className="text-center py-16 bg-card rounded-2xl border border-dashed border-[#d4c3bc] p-8 space-y-4">
